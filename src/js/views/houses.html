@@ -1,0 +1,45 @@
+<!--
+ Copyright (c) 2014, 2021, Oracle and/or its affiliates.
+ Licensed under The Universal Permissive License (UPL), Version 1.0
+ as shown at https://oss.oracle.com/licenses/upl/
+ -->
+<div class="oj-hybrid-padding">
+  <h1>Houses</h1>
+  <div id="componentDemoContent" class="oj-flex">    
+      
+    <div id="tableWrapper" class="oj-xl-3 oj-lg-3 oj-md-6 oj-sm-12 oj-flex-item oj-flex">
+
+    <oj-form-layout id="myForm" label-edge="top" columns="1" max-columns="1" style="width:100%">                
+        
+        <oj-table
+            id="table"
+            aria-label="Houses Table"
+            accessibility.row-header="depName"
+            data="[[dataSource]]"
+            selection-mode='{"row": "multiple", "column": "multiple"}'
+            dnd='{"reorder": {"columns": "enabled"}}'
+            scroll-policy="loadMoreOnScroll"
+            scroll-policy-options='{"fetchSize": 10}'
+            columns='[{"headerText": "N°", 
+                       "field": "number",
+                       "headerClassName": "oj-sm-only-hide",
+                       "className": "oj-sm-only-hide",
+                       "resizable": "enabled",
+                       "id": "houseNumber"},
+                      {"headerText": "Neighbors", 
+                       "field": "neighbors",
+                       "resizable": "enabled",
+                       "id": "depName"},
+                      {"headerText": "Location Id", 
+                       "field": "LocationId",
+                       "headerClassName": "oj-sm-only-hide",
+                       "className": "oj-sm-only-hide",
+                       "resizable": "enabled",
+                       "id": "locId"}]'
+            class="demo-table-container"></oj-table>
+    </oj-form-layout>         
+     
+    </div>
+      
+    </div>
+</div>
