@@ -1,0 +1,194 @@
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<STYLE TYPE="text/css">
+         
+    
+    
+</STYLE>
+<div id="circle"></div>
+<div class="">
+     
+    <oj-collapsible id="collapsiblePage" data-oj-binding-provider="none"> 
+        
+        <h1 slot="header" class="oj-typography-heading-sm oj-header-border">Neighbor Data</h1>
+    
+        <oj-form-layout id="ofl1" label-edge="start" class="oj-form-control-full-width" max-columns="1">
+            <oj-input-text
+              id="name"
+              value="{{name}}"
+              required="required"
+              label-hint="Name">              
+            </oj-input-text>
+
+            <oj-input-text
+              id="lastname"
+              value="{{lastname}}"                              
+              required="required"
+              label-hint="Lastname">              
+            </oj-input-text>
+
+            <oj-input-text
+              id="email"
+              value="{{email}}"
+              validators="[[emailPatternValidator]]"
+              placeholder="neighbor@example.com"
+              required="required"
+              label-hint="Email">   
+                 <div slot="end" class="oj-text-field-start-end-icon oj-ux-ico-email" role="img"></div>         
+            </oj-input-text>
+
+            <oj-input-text
+              id="phone"
+              value="{{phone}}"   
+              validators="[[phonePatternValidator]]"
+              placeholder="+56 9 12345678"
+              required="required"
+              label-hint="Phone"> 
+                <!--div slot="start" class="" role="img" style="padding-left:5px">+56 9</div-->
+                <div slot="end" class="oj-text-field-start-end-icon oj-ux-ico-phone" role="img"></div>
+            </oj-input-text>
+
+            <div slot="footer" style="text-align:right">
+              <oj-button id="okButton" chroming="solid" on-oj-action="[[addRow]]">
+                  Add
+              </oj-button>
+            </div>
+        </oj-form-layout>
+        
+    </oj-collapsible>
+    
+    <oj-table id="table"
+        aria-label="Departments Table"
+        class='oj-bg-body demo-table-container'
+        dnd='{"reorder": {"columns": "enabled"}}'
+        data='[[datasource]]'
+        style="width:100%"
+        edit-mode='rowEdit'
+        edit-row='{{editRow}}'
+        on-oj-before-row-edit='[[beforeRowEditListener]]'
+        on-oj-before-row-edit-end='[[beforeRowEditEndListener]]'
+        columns-default.sortable='disabled'              
+        columns='[                         
+                  {"field":"name",
+                   "sortable": "enabled",
+                   "headerText": "Name",
+                   "className": "table-world-wrap",                                      
+                   "weight": "2",
+                   "minWidth": "10rem",
+                   "template": "nameTemplate"},
+                  {"field":"lastname",
+                    "headerText": "Lastname",                           
+                    "sortable": "enabled",
+                    "minWidth": "8rem",
+                    "weight": "2",
+                    "template": "lastnameTemplate"},
+                  {"field":"email",
+                    "sortable": "enabled",                                                                       
+                    "headerText": "Email",
+                    "template": "emailTemplate"},                     
+                   {"field":"phone",
+                    "sortable": "enabled",                                                                       
+                    "headerText": "Phone",
+                    "template": "phoneTemplate"},                    
+                   {"headerText": "Action",                                                                                                                                        
+                    "template": "actionTemplate"}                  
+                    ]'>
+
+      <template slot="nameTemplate" data-oj-as="cell">
+        <oj-bind-if test='[[cell.mode=="navigation"]]'>
+          <oj-bind-text value="[[cell.data]]"></oj-bind-text>
+        </oj-bind-if>
+
+        <oj-bind-if test='[[cell.mode=="edit"]]'>            
+          <oj-input-text id="it1" value="{{rowData.name}}" required="required" class="editable"></oj-input-text>
+        </oj-bind-if>
+      </template>
+        
+      <template slot="lastnameTemplate" data-oj-as="cell">
+        <oj-bind-if test='[[cell.mode=="navigation"]]'>
+          <oj-bind-text value="[[cell.data]]"></oj-bind-text>
+        </oj-bind-if>
+
+        <oj-bind-if test='[[cell.mode=="edit"]]'>            
+          <oj-input-text id="it1" value="{{rowData.lastname}}" required="required" class="editable"></oj-input-text>
+        </oj-bind-if>
+      </template>     
+        
+      <template slot="emailTemplate" data-oj-as="cell">
+        <oj-bind-if test='[[cell.mode=="navigation"]]'>
+          <oj-bind-text value="[[cell.data]]"></oj-bind-text>
+        </oj-bind-if>
+
+        <oj-bind-if test='[[cell.mode=="edit"]]'>            
+          <oj-input-text 
+                id="it1" 
+                value="{{rowData.email}}" 
+                required="required" 
+                validators="[[emailPatternValidator]]"
+                class="editable">                
+          </oj-input-text>
+        </oj-bind-if>
+      </template>   
+        
+      <template slot="phoneTemplate" data-oj-as="cell">
+        <oj-bind-if test='[[cell.mode=="navigation"]]'>
+          <oj-bind-text value="[[cell.data]]"></oj-bind-text>
+        </oj-bind-if>
+
+        <oj-bind-if test='[[cell.mode=="edit"]]'>            
+          <oj-input-text 
+              id="it1" 
+              value="{{rowData.phone}}" 
+              required="required" 
+              validators="[[phonePatternValidator]]" 
+              class="editable">                  
+          </oj-input-text>
+        </oj-bind-if>
+      </template>          
+        
+      <template slot="actionTemplate" data-oj-as="cell">
+        <oj-bind-if test='[[cell.mode=="navigation"]]'>
+            <oj-button display='icons' chroming='borderless' on-oj-action="[[handleUpdate]]">
+              <span slot='startIcon' class="oj-ux-ico-edit"></span>
+              Edit
+            </oj-button>
+            <oj-button
+                on-oj-action="[[removeRow]]"
+                display="icons"
+                chroming="borderless"
+                data-oj-clickthrough="disabled">
+                <span slot="startIcon" class="oj-ux-ico-delete-circle"></span>
+            </oj-button>
+        </oj-bind-if>
+
+        <oj-bind-if test='[[cell.mode=="edit"]]'>
+          <oj-toolbar class="oj-sm-padding-0-vertical">
+            <oj-button display='icons' on-oj-action="[[handleDone]]">
+              <span slot='startIcon' class="oj-ux-ico-check"></span>
+              Save
+            </oj-button>
+            <oj-button display='icons' on-oj-action="[[handleCancel]]">
+              <span slot='startIcon' class="oj-ux-ico-multiply"></span>
+              Cancel
+            </oj-button>
+          </oj-toolbar>
+        </oj-bind-if>
+      </template>      
+        
+      <template slot="removeTemplate" data-oj-as="cell">
+            <oj-button
+                on-oj-action="[[removeRow]]"
+                display="icons"
+                chroming="borderless"
+                data-oj-clickthrough="disabled">
+                <span slot="startIcon" class="oj-ux-ico-delete-circle"></span>
+            </oj-button>
+      </template>
+        
+    </oj-table>         
+
+</div>     
+<br>

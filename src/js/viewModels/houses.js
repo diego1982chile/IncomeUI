@@ -8,38 +8,130 @@
 /*
  * Your customer ViewModel code goes here
  */
-define(["knockout", 'ojs/ojmodel', "ojs/ojarraydataprovider", "ojs/ojtable", 
-        "ojs/ojbutton", "ojs/ojformlayout"],
+define(['knockout',                     
+        'ojs/ojcollectiondataprovider',                
+        'ojs/ojarraydataprovider',
+        'ojs/ojarraytabledatasource',
+        'ojs/ojpagingcontrol',        
+        'ojs/ojinputtext','ojs/ojlistview',
+        'ojs/ojlabel','ojs/ojlabelvalue','ojs/ojbutton','ojs/ojselectcombobox',
+        'ojs/ojconveyorbelt'],
 
- function(ko, Model, ArrayDataProvider) {
+ function(ko, CollectionDataProvider, ArrayDataProvider) {
      
     function housesViewModel() {
-        // Below are a set of the ViewModel methods invoked by the oj-module component.
-        // Please reference the oj-module jsDoc for additional information.
+        
+       var self = this;             
+        
+        self.selectedTabItem = ko.observable();
+        
+        self.scrollPos = ko.observable({ y: 0 });
+        self.scrollPosDetail = ko.observable();
+        
+        self.handleScrollPositionChanged = function (event) {
+            var value = event.detail.value;
+            self.scrollPosDetail('x: ' + Math.round(value.x) + ' y: ' + Math.round(value.y) + ' key: ' + value.key + ' index: ' + value.index + ' offsetX: ' + Math.round(value.offsetX) + ' offsetY: ' + Math.round(value.offsetY));
+        }.bind(self);
+        
+        /* Variables */        
+        //self.selectedTabItem = ko.observable("settings");
+        //self.backTestListDataSource = ko.observable();
+        self.selectedHouse = ko.observable();
+        self.selectedHouseModel = ko.observable();
+        self.houseList = ko.observable();
+        
+        self.selectionRequired = ko.observable(false);
+        
+        self.houseListDataSource = ko.computed(function () {
+           /* List View Collection and Model */
+            var houseModelItem = oj.Model.extend({
+                idAttribute: 'id'
+            });
 
-        var self = this;        
-        
-        self.filter = ko.observable("");
-        
-        self.data = ko.observableArray();
-        
-        self.dataSource = ko.computed(function () {
-            
-            $.getJSON("http://192.168.0.6:8080/IncomeService/api/houses").
-                then(function (houses) {                                        
-                    self.data(houses);                                        
-            }); 
-            
-            var collection = new Model.Collection(null, {
-              url: "http://192.168.0.6:8080/IncomeService/api/houses"
+            var houseListCollection = new oj.Collection(null, {
+                url: "http://192.168.0.5:8080/IncomeService/api/houses/",
+                model: houseModelItem
+            });                          
+
+            self.houseList = ko.observable(houseListCollection);  
+
+            //self.backTestListDataSource(new oj.CollectionTableDataSource(self.backTestList()));   
+            //return new PagingDataProviderView(new CollectionDataProvider(self.backTestList()));
+            return new CollectionDataProvider(self.houseList());
+        });                              
+                
+        /* List selection listener */        
+        self.houseListSelectionChanged = function () {   
+
+            self.selectionRequired(false);
+                        
+            self.selectedHouseModel(self.houseList().get(self.selectedHouse()));                        
+                                                              
+            // Check if the selected ticket exists within the tab data
+            var match = ko.utils.arrayFirst(self.tabData(), function (item) {
+              return item.id === self.selectedHouse();
             });
             
-            return new ArrayDataProvider(self.data, {
-                  keyAttributes: "HouseId",
-                  implicitSort: [{ attribute: "HouseId", direction: "ascending" }],
-              });
+            console.log(JSON.stringify(self.houseList()));
 
-        });
+            if (!match) { 
+                while(self.tabData().length > 0) {                    
+                    self.tabData.pop();
+                }                
+                self.tabData.push({
+                  "house": "House " +self.houseList().get(self.selectedHouse()).get("number"),
+                  "id": self.selectedHouse()
+                });
+            }
+            
+            self.selectedTabItem(self.selectedHouse());                        
+        };  
+        
+        
+        /* Tab Component */
+        self.tabData = ko.observableArray([]);
+        self.tabBarDataSource = new oj.ArrayTableDataSource(self.tabData, { idAttribute: 'id' });
+
+        self.deleteTab = function (id) {                        
+            
+            // Prevent the first item in the list being removed
+            //if(id != self.backTestList().at(0).id){          
+            if(self.tabData.length > 1) {
+
+              var hnavlist = document.getElementById('ticket-tab-bar'),
+                items = self.tabData();
+              for (var i = 0; i < items.length; i++) {
+                if (items[i].id === id) {
+                  self.tabData.splice(i, 1);
+
+                 /* Check if the current selected list item matches the open tab,
+                    if so, reset to the first index in the list
+                  */
+                  if(id === self.selectedBackTest() || self.selectedBackTest() !== self.selectedTabItem()){                         
+                        self.selectedTabItem(self.tabData()[0].id);
+                  }
+
+                  oj.Context.getContext(hnavlist)
+                    .getBusyContext()
+                    .whenReady()
+                    .then(function () {
+                      hnavlist.focus();
+                    });
+                  break;
+                }
+              }
+            }
+        };
+
+        self.onTabRemove = function (event) {
+            self.deleteTab(event.detail.key);
+            event.preventDefault();
+            event.stopPropagation();
+        };
+
+        self.tabSelectionChanged = function () {               
+            self.selectedHouseModel(self.houseList().get(self.selectedTabItem()));            
+        } 
                 
     }
         

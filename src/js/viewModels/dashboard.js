@@ -49,7 +49,7 @@ define(['knockout',
             });
 
             var categoryListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.6:8080/IncomeService/api/years/",
+                url: "http://192.168.0.5:8080/IncomeService/api/years/",
                 model: categoryModelItem
             });                          
 

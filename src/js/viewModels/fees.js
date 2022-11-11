@@ -33,7 +33,7 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
             var year = params.yearModel().get('year');                                                                 
  
             var collection = new Model.Collection(null, {
-              url: "http://192.168.0.6:8080/IncomeService/api/fees/" + year
+              url: "http://192.168.0.5:8080/IncomeService/api/fees/" + year
             });
             
             console.log(collection);

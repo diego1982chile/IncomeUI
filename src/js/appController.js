@@ -37,19 +37,20 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
         { path: '', redirect: 'dashboard' },
         { path: 'dashboard', detail: { label: 'Dashboard', iconClass: 'oj-ux-ico-bar-chart' } },
         { path: 'houses', detail: { label: 'Houses', iconClass: 'oj-ux-ico-fire' } },     
-        { path: 'customers', detail: { label: 'Customers', iconClass: 'oj-ux-ico-contact-group' } },
+        { path: 'newHouse', id: 'newHouse', detail: { label: 'New House', iconClass: 'oj-ux-ico-fire' } },         
         { path: 'about', detail: { label: 'About', iconClass: 'oj-ux-ico-information-s' } }
       ];
 
       // Router setup
-      let router = new CoreRouter(navData, {
+      this.router = new CoreRouter(navData, {
         urlAdapter: new UrlParamAdapter()
       });
-      router.sync();
+      
+      this.router.sync();
 
-      this.moduleAdapter = new ModuleRouterAdapter(router);
+      this.moduleAdapter = new ModuleRouterAdapter(this.router);
 
-      this.selection = new KnockoutRouterAdapter(router);
+      this.selection = new KnockoutRouterAdapter(this.router);
 
       // Setup the navDataProvider with the routes, excluding the first redirected
       // route.
