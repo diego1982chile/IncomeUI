@@ -11,6 +11,14 @@
             <div id='listviewWrapper' class="list-view-container">
                 <!--oj-paging-control id="paging" data="[[backTestListDataSource]]" page-size="4">
                 </oj-paging-control-->
+                <div slot="header" style="text-align:right">
+                    <oj-button                                        
+                        chroming="solid"
+                        on-oj-action="[[newHouse]]" 
+                        data-oj-clickthrough="disabled">
+                        New
+                    </oj-button>
+                </div>                
                 <oj-list-view id='listview'
                 aria-label="listview with paging control"                               
                 class='oj-sm-12'

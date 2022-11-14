@@ -75,17 +75,46 @@ define(['knockout',
             console.log(JSON.stringify(self.houseList()));
 
             if (!match) { 
+                /*
                 while(self.tabData().length > 0) {                    
                     self.tabData.pop();
-                }                
+                }    
+                */
+
+                var name = "New House";
+                
+                console.log(self.houseList().get(self.selectedHouse()));
+                
+                if(self.houseList().get(self.selectedHouse()) !== undefined) {
+                    name = "House " + self.houseList().get(self.selectedHouse()).get("number");
+                }
+                
                 self.tabData.push({
-                  "house": "House " +self.houseList().get(self.selectedHouse()).get("number"),
+                  "house": name,
                   "id": self.selectedHouse()
                 });
             }
             
             self.selectedTabItem(self.selectedHouse());                        
-        };  
+        }; 
+        
+        /* New house listener */        
+        self.newHouse = function () {   
+            
+            var house = {};                        
+            
+            house.id = null;
+            house.number = null;
+            house.debts = [];
+            house.neighbors = [];            
+            
+            console.log(self.houseList());                                    
+             
+            self.selectedHouseModel(house);                        
+            
+            self.selectedHouse([]);
+                                                                              
+        };         
         
         
         /* Tab Component */
@@ -95,8 +124,8 @@ define(['knockout',
         self.deleteTab = function (id) {                        
             
             // Prevent the first item in the list being removed
-            //if(id != self.backTestList().at(0).id){          
-            if(self.tabData.length > 1) {
+            if(id != self.houseList().at(0).id){          
+            //if(self.tabData.length > 1) {
 
               var hnavlist = document.getElementById('ticket-tab-bar'),
                 items = self.tabData();
@@ -107,7 +136,7 @@ define(['knockout',
                  /* Check if the current selected list item matches the open tab,
                     if so, reset to the first index in the list
                   */
-                  if(id === self.selectedBackTest() || self.selectedBackTest() !== self.selectedTabItem()){                         
+                  if(id === self.selectedHouse() || self.selectedHouse() !== self.selectedTabItem()){                         
                         self.selectedTabItem(self.tabData()[0].id);
                   }
 

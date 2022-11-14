@@ -20,23 +20,27 @@ and open the template in the editor.
 }
 </STYLE>
 <div id="circle"></div>
+
 <div class="">
 
     <oj-form-layout id="ofl1" label-edge="start" max-columns="1" 
-                    class="oj-form-control-full-width">
+                    class="oj-form-control-full-width">              
+        
         <oj-input-number
-          id="buttonId1"
+          id="number"
           value="{{number}}"
           label-hint="Number"
+          required="required" 
           min="0"
           max="100"
-            step="0">              
-        </oj-input-number>        
+          step="0">              
+        </oj-input-number>
+       
         
         <oj-bind-for-each data="[[debts]]">
           <template>
             <oj-input-number
-              id="buttonId1"
+              id="debt"
               value="{{$current.data.amount}}"
               label-hint="Debt"
               min="0"
@@ -99,6 +103,15 @@ and open the template in the editor.
     </oj-button>
 </div>
 
-<br>
-<div style="width: 1px; min-width: 100%;">   
-</div>
+<oj-dialog id="dialogMsg" dialog-title="Messagge DIalog" cancel-behavior="icon">
+    <div slot="body">
+      <p id="desc">
+          This is the dialog content. User can change dialog resize behavior, cancel behavior and drag
+          behavior by setting attributes. Default attribute value depends on the theme.
+      </p>
+    </div>
+    <div slot="footer">
+      <oj-button id="okButton" chroming="callToAction" on-oj-action="[[closeDialog]]">Close</oj-button>
+    </div>
+</oj-dialog>   
+

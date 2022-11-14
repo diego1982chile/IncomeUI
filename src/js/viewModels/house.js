@@ -27,7 +27,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
         /* Variables */
         self.id = ko.observable(null);
         
-        self.number = ko.observable(1);
+        self.number = ko.observable(null);
                                             
         self.debts = ko.observableArray();
         
@@ -41,21 +41,29 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
         
         ko.computed(function () {
             
-            //console.log(JSON.stringify(params));            
-            if (typeof params.houseModel() === 'undefined') {
-                return;
-            }                                                                                                           
+            console.log(JSON.stringify(params));            
+            var url = "http://192.168.0.5:8080/IncomeService/api/houses/new";                                                 
             
-            var houseId = params.houseModel().get('id');                           
+            try {
+                var houseId = params.houseModel().get('id');    
+                url = "http://192.168.0.5:8080/IncomeService/api/houses/" + houseId;                                                 
+            }                        
+            catch(err) {
 
-            $.getJSON("http://192.168.0.5:8080/IncomeService/api/houses/" + houseId).
-                then(function (house) {                       
-                    //console.log(JSON.stringify(concept.validDescriptionsButFSNandFavorite));
-                    self.houseModel(house);                                       
-                    self.id(house.id)
-                    self.number(house.number);
-                    self.debts(house.debts);                       
-                });                                   
+            }
+            
+            $.getJSON(url).then(function (house) {                       
+                console.log(JSON.stringify(house));
+                self.houseModel(house);                                       
+                self.id(house.id)
+                self.number(house.number);                
+                if(house.debts.length > 0) {                    
+                    self.debts(house.debts);                    
+                } 
+                else {
+                    self.debts(ko.observableArray());                    
+                }              
+            });
                  
             self.tabs([{ name: "Neighbors", id: "neighbors-tab" }]);  
         });
@@ -64,28 +72,58 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
          
         self.submitHouse = function (event, data) {
             
-            var house = {};
+            let number = document.getElementById("number");
+            
+            number.validate().then((result3) => { 
+                
+                if(result3 === 'invalid') {
+                    return false;
+                }
+                
+                if(self.houseModel().neighbors.length === 0) {
+                    self.openDialog();
+                    return false;
+                }
+                
+                var house = {};
 
-            house.id = self.id();
-            house.number = self.number();
-            house.debts = self.debts();
-            house.neighbors = self.houseModel().neighbors;            
+                house.id = self.id();
+                house.number = self.number();
+                house.debts = self.debts();
+                house.neighbors = self.houseModel().neighbors;   
+                
 
-            $.ajax({                    
-                type: "POST",
-                url: "http://192.168.0.5:8080/IncomeService/api/houses/save",                                        
-                dataType: "json",      
-                data: JSON.stringify(house),			  		 
-                //crossDomain: true,
-                contentType : "application/json",                    
-                success: function() {                    
-                    alert("house saved successfuly");                                                           
-                },
-                error: function (request, status, error) {
-                    alert(request.responseText);                          
-                }                                  
-            });            
-        }                   
+                let name = document.getElementById("name");
+                let lastname = document.getElementById("lastname");                                  
+                let email = document.getElementById("email");
+                let phone = document.getElementById("phone");            
+
+                $.ajax({                    
+                    type: "POST",
+                    url: "http://192.168.0.5:8080/IncomeService/api/houses/save",                                        
+                    dataType: "json",      
+                    data: JSON.stringify(house),			  		 
+                    //crossDomain: true,
+                    contentType : "application/json",                    
+                    success: function() {                    
+                        alert("house saved successfuly");                                                           
+                    },
+                    error: function (request, status, error) {
+                        alert(request.responseText);                          
+                    }                                  
+                });            
+                
+            });
+                        
+        }
+        
+        self.closeDialog = function(event) {
+            document.getElementById("dialogMsg").close();
+        }
+        
+        self.openDialog = function(event) {
+            document.getElementById("dialogMsg").open();            
+        }
                                             
     }    
        
