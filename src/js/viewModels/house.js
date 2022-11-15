@@ -65,7 +65,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
                 }              
             });
                  
-            self.tabs([{ name: "Neighbors", id: "neighbors-tab" }]);  
+            self.tabs([{ name: "Neighbors", id: "neighbors-tab" }, { name: "Debts", id: "debts-tab" }]);  
         });
         
         self.dataProvider = new ArrayDataProvider(self.tabs, { keyAttributes: "id" });
@@ -85,7 +85,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
                     return false;
                 }
                 
-                var house = {};
+                var house = {};                                
 
                 house.id = self.id();
                 house.number = self.number();

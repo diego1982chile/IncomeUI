@@ -75,11 +75,10 @@ define(['knockout',
             console.log(JSON.stringify(self.houseList()));
 
             if (!match) { 
-                /*
+                
                 while(self.tabData().length > 0) {                    
                     self.tabData.pop();
-                }    
-                */
+                }                    
 
                 var name = "New House";
                 
@@ -93,6 +92,7 @@ define(['knockout',
                   "house": name,
                   "id": self.selectedHouse()
                 });
+                                
             }
             
             self.selectedTabItem(self.selectedHouse());                        
@@ -124,8 +124,8 @@ define(['knockout',
         self.deleteTab = function (id) {                        
             
             // Prevent the first item in the list being removed
-            if(id != self.houseList().at(0).id){          
-            //if(self.tabData.length > 1) {
+            //if(id != self.houseList().at(0).id){          
+            if(self.tabData.length > 1) {
 
               var hnavlist = document.getElementById('ticket-tab-bar'),
                 items = self.tabData();
@@ -159,7 +159,8 @@ define(['knockout',
         };
 
         self.tabSelectionChanged = function () {               
-            self.selectedHouseModel(self.houseList().get(self.selectedTabItem()));            
+            self.selectedHouseModel(self.houseList().get(self.selectedTabItem())); 
+            self.tabBarDataSource.reset();
         } 
                 
     }

@@ -23,6 +23,11 @@ define(['knockout',
         
         var self = this;             
         
+        /* Tab Component */
+        self.tabData = ko.observableArray([]);
+        self.tabBarDataSource = new oj.ArrayTableDataSource(self.tabData, { idAttribute: 'id' });
+
+        
         self.selectedTabItem = ko.observable();
         
         self.scrollPos = ko.observable({ y: 0 });
@@ -75,27 +80,24 @@ define(['knockout',
             //console.log(JSON.stringify(self.selectedYearModel()));
 
             if (!match) { 
+                
                 while(self.tabData().length > 0) {                    
                     self.tabData.pop();
-                }                
+                } 
+                
                 self.tabData.push({
                   "year": self.yearList().get(self.selectedYear()).get("year"),
                   "id": self.selectedYear()
                 });
-            }
+            }                                    
             
             self.selectedTabItem(self.selectedYear());                        
         };  
-        
-        
-        /* Tab Component */
-        self.tabData = ko.observableArray([]);
-        self.tabBarDataSource = new oj.ArrayTableDataSource(self.tabData, { idAttribute: 'id' });
-
+                
         self.deleteTab = function (id) {                        
             
             // Prevent the first item in the list being removed
-            //if(id != self.backTestList().at(0).id){          
+            //if(id != self.yearList().at(0).id) {          
             if(self.tabData.length > 1) {
 
               var hnavlist = document.getElementById('ticket-tab-bar'),
@@ -130,7 +132,9 @@ define(['knockout',
         };
 
         self.tabSelectionChanged = function () {               
-            self.selectedYearModel(self.yearList().get(self.selectedTabItem()));            
+            self.selectedYearModel(self.yearList().get(self.selectedTabItem()));      
+            self.tabBarDataSource.reset();
+            //self.tabBarDataSource.reset(self.tabData());
         } 
         
     }      
