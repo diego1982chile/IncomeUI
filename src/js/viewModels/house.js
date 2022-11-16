@@ -28,9 +28,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
         self.id = ko.observable(null);
         
         self.number = ko.observable(null);
-                                            
-        self.debts = ko.observableArray();
-        
+                                                    
         self.houseModel = ko.observable();
               
         self.dataProvider = ko.observableArray();                
@@ -89,15 +87,9 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
 
                 house.id = self.id();
                 house.number = self.number();
-                house.debts = self.debts();
+                house.debts = self.houseModel().debts;
                 house.neighbors = self.houseModel().neighbors;   
                 
-
-                let name = document.getElementById("name");
-                let lastname = document.getElementById("lastname");                                  
-                let email = document.getElementById("email");
-                let phone = document.getElementById("phone");            
-
                 $.ajax({                    
                     type: "POST",
                     url: "http://192.168.0.5:8080/IncomeService/api/houses/save",                                        

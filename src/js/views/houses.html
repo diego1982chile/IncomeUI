@@ -25,7 +25,7 @@
                 data='[[houseListDataSource]]'
                 selection-mode='single' selection="{{selectedHouse}}"
                 on-selection-changed="[[houseListSelectionChanged]]"
-                selection-required='true'
+                selection-required='false'
                 scroll-position="{{scrollPos}}" on-scroll-position-changed="[[handleScrollPositionChanged]]"
                 scroll-policy="loadMoreOnScroll" scroll-policy-options.fetch-size="100"
                 item.renderer="[[oj.KnockoutTemplateUtils.getRenderer('ticket-list-template', true)]]">

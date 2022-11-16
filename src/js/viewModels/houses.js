@@ -51,9 +51,11 @@ define(['knockout',
             var houseListCollection = new oj.Collection(null, {
                 url: "http://192.168.0.5:8080/IncomeService/api/houses/",
                 model: houseModelItem
-            });                          
+            });                        
 
             self.houseList = ko.observable(houseListCollection);  
+            
+            self.selectedHouse([]);
 
             //self.backTestListDataSource(new oj.CollectionTableDataSource(self.backTestList()));   
             //return new PagingDataProviderView(new CollectionDataProvider(self.backTestList()));
