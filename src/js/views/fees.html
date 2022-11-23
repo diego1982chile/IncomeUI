@@ -34,22 +34,23 @@
               cell.class-name="[[getCellClassName]]">                  
             </oj-data-grid>
             
-          <script type="text/html" id="header_template">
-              <oj-bind-if test="[[true]]">
-                  <span><oj-bind-text value="[[$context.key]]"></oj-bind-text></span> 
-              </oj-bind-if>              
-          </script>
-          <script type="text/html" id="cell_template">
-              <oj-bind-if test="[[$data == 0]]">
+            <script type="text/html" id="header_template">
+                <oj-bind-if test="[[true]]">
+                    <span><oj-bind-text value="[[$context.key]]"></oj-bind-text></span> 
+                </oj-bind-if>              
+            </script>
+          
+            <script type="text/html" id="cell_template">              
+                <oj-bind-if test="[[$data == 0]]">                  
                   <span>                      
-                      <oj-button chroming="outlined" on-oj-action="[[]]" id='borderlessPushIcon'>                      
+                      <oj-button chroming="outlined" on-oj-action="[[]]" class="gotoPayButton">                      
                         Pagar
-                      </oj-button> 
+                      </oj-button>                      
                   </span>
-              </oj-bind-if>     
-              <oj-bind-if test="[[$data != 0]]">
-                  <span> <oj-bind-text value="[[$data]]"></oj-bind-text></span>
-              </oj-bind-if>              
-          </script> 
+                </oj-bind-if>     
+                <oj-bind-if test="[[$data != 0]]">
+                    <span> <oj-bind-text value="[[$data]]"></oj-bind-text></span>
+                </oj-bind-if>              
+            </script> 
         </div>
     </div>          

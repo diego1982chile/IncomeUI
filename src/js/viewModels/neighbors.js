@@ -168,8 +168,7 @@ function (ko, ArrayDataProvider, ListDataProviderView, ojdataprovider_1, AsyncRe
                             else {
                                 alert("this neighbor already exists");
                             }                              
-
-                            console.log(JSON.stringify(self.getDescriptionTypeById(self.descriptionType()))); 
+                            
                             
                         });
                     });

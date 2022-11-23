@@ -54,7 +54,7 @@ define(['knockout',
             });
 
             var categoryListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.5:8080/IncomeService/api/years/",
+                url: "http://192.168.0.9:8080/IncomeService/api/years/",
                 model: categoryModelItem
             });                          
 
@@ -135,7 +135,8 @@ define(['knockout',
             self.selectedYearModel(self.yearList().get(self.selectedTabItem()));      
             self.tabBarDataSource.reset();
             //self.tabBarDataSource.reset(self.tabData());
-        } 
+        }
+               
         
     }      
 

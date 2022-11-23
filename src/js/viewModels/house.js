@@ -8,15 +8,15 @@
  * backtest module
  */
 define(['ojs/ojcore','knockout',
-        'ojs/ojresponsiveutils', 
+        'ojs/ojresponsiveutils',  
         'ojs/ojresponsiveknockoututils',
-        'ojs/ojarraydataprovider',
+        'ojs/ojarraydataprovider','ojs/ojcollectiondataprovider',
         "ojs/ojradioset",
         "ojs/ojswitcher",
-        'ojs/ojcollapsible',
+        'ojs/ojcollapsible',"ojs/ojdialog",'ojs/ojmessages','ojs/ojpopup',
         'ojs/ojconverter-number','ojs/ojchart','ojs/ojformlayout',"ojs/ojinputnumber"], 
     
-function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, NumberConverter) {
+function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, CollectionDataProvider, NumberConverter) {
     /**
      * The view model for the main content view template
      */        
@@ -35,38 +35,72 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
         
         self.tabs = ko.observableArray();        
         
-        self.selectedItem = ko.observable("neighbors-tab");                  
+        self.selectedItem = ko.observable("neighbors-tab");                
         
+        self.messages = ko.observableArray();
+  
+        self.messagesDataprovider = new ArrayDataProvider(self.messages);
+        
+        self.dataProvider = new ArrayDataProvider(self.tabs, { keyAttributes: "id" });
+        
+        self.removeMsgs = function (event) {            
+            self.messages([]);                        
+        }
+        
+        self.refreshHouseList = (house) => {  
+            params.houseList().pop();
+            params.houseList().push(house);            
+            //$(".oj-pagingcontrol-nav-last").trigger("click");
+            params.selectedHouse([house.id]);
+        };
+        
+        self.removeFromHouseList = (id) => {                         
+            params.houseList().remove(id);
+            params.selectedHouse([]);
+            self.sleep(500).then(() => {   
+                if(params.houseList().length == 0) { 
+                    $("#newButton").trigger("click");  
+                }
+            }); 
+        };
+       
+                        
         ko.computed(function () {
             
-            console.log(JSON.stringify(params));            
-            var url = "http://192.168.0.5:8080/IncomeService/api/houses/new";                                                 
+            //self.removeMsgs();                   
+            
+            //alert(JSON.stringify(params.houseModel()));
+            
+            var url = "http://192.168.0.9:8080/IncomeService/api/houses/new";                                                 
             
             try {
                 var houseId = params.houseModel().get('id');    
-                url = "http://192.168.0.5:8080/IncomeService/api/houses/" + houseId;                                                 
+                url = "http://192.168.0.9:8080/IncomeService/api/houses/" + houseId;                                                 
             }                        
-            catch(err) {
-
+            catch(err) {                
+                
             }
             
             $.getJSON(url).then(function (house) {                       
-                console.log(JSON.stringify(house));
+                console.log(JSON.stringify(house));                
                 self.houseModel(house);                                       
                 self.id(house.id)
-                self.number(house.number);                
-                if(house.debts.length > 0) {                    
-                    self.debts(house.debts);                    
-                } 
+                self.number(house.number);         
+                
+                //alert(JSON.stringify(house));
+                
+                if(house.persisted) {                    
+                    $("#deleteButton").show();
+                }
                 else {
-                    self.debts(ko.observableArray());                    
-                }              
+                    $("#deleteButton").hide();
+                }                
+              
             });
                  
-            self.tabs([{ name: "Neighbors", id: "neighbors-tab" }, { name: "Debts", id: "debts-tab" }]);  
-        });
-        
-        self.dataProvider = new ArrayDataProvider(self.tabs, { keyAttributes: "id" });
+            self.tabs([{ name: "Neighbors", id: "neighbors-tab" }, { name: "Debts", id: "debts-tab" }]);                        
+        });   
+       
          
         self.submitHouse = function (event, data) {
             
@@ -78,8 +112,8 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
                     return false;
                 }
                 
-                if(self.houseModel().neighbors.length === 0) {
-                    self.openDialog();
+                if(self.houseModel().neighbors.length === 0) {                    
+                    self.messages([{severity: 'error', summary: 'Invalid Data', detail: 'Must provide at least one neighbor', autoTimeout: 5000}]);                     
                     return false;
                 }
                 
@@ -92,20 +126,45 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
                 
                 $.ajax({                    
                     type: "POST",
-                    url: "http://192.168.0.5:8080/IncomeService/api/houses/save",                                        
+                    url: "http://192.168.0.9:8080/IncomeService/api/houses/save",                                        
                     dataType: "json",      
                     data: JSON.stringify(house),			  		 
                     //crossDomain: true,
                     contentType : "application/json",                    
-                    success: function() {                    
-                        alert("house saved successfuly");                                                           
+                    success: function(newHouse) {                                            
+                        self.messages([{severity: 'info', summary: 'Succesful Action', detail: "house saved successfuly", autoTimeout: 5000}]);
+                        self.refreshHouseList(newHouse);                        
                     },
                     error: function (request, status, error) {
-                        alert(request.responseText);                          
+                        //alert(JSON.stringify(request));                          
+                        //alert(request.responseText);     
+                        self.messages([{severity: 'error', summary: 'Service Error', detail: request.responseText, autoTimeout: 5000}]);
                     }                                  
                 });            
                 
             });
+                        
+        }
+        
+        self.removeHouse = function (event, data) {             
+            
+            var id = params.houseModel().get("id");
+                
+            $.ajax({                    
+                type: "DELETE",
+                url: "http://192.168.0.9:8080/IncomeService/api/houses/delete/" + id,                                        
+                dataType: "json",      		  		 
+                //crossDomain: true,
+                contentType : "application/json",                    
+                success: function(id) {                                        
+                    self.messages([{severity: 'info', summary: 'Succesful Action', detail: "house removed successfuly", autoTimeout: 5000}]);
+                    self.removeFromHouseList(id);                        
+                },
+                error: function (request, status, error) {
+                    self.messages([{severity: 'error', summary: 'Service Error', detail: request.responseText, autoTimeout: 5000}]);
+                    //alert(request.responseText);                          
+                }                                  
+            });                     
                         
         }
         
@@ -115,6 +174,10 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, N
         
         self.openDialog = function(event) {
             document.getElementById("dialogMsg").open();            
+        }
+       
+        self.sleep = (ms) => {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
                                             
     }    

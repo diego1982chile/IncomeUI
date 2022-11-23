@@ -81,7 +81,7 @@ and open the template in the editor.
 <br/>
 
 <div slot="footer" style="text-align:right">
-    <oj-button id="deleteButton" chroming="danger" on-oj-action="[[submitHouse]]" class="oj-button-danger-chrome">
+    <oj-button id="deleteButton" chroming="danger" on-oj-action="[[removeHouse]]" class="oj-button-danger-chrome">
         Delete
     </oj-button>
     <oj-button id="saveButton" chroming="callToAction" on-oj-action="[[submitHouse]]">
@@ -89,15 +89,17 @@ and open the template in the editor.
     </oj-button>
 </div>
 
-<oj-dialog id="dialogMsg" dialog-title="Messagge DIalog" cancel-behavior="icon">
+ <!-- Messages -->
+<oj-messages messages="[[messagesDataprovider]]" position="{}" display="notification">
+</oj-messages>
+
+<oj-dialog id="dialogMsg" dialog-title="Messagge Dialog" cancel-behavior="icon">
     <div slot="body">
-      <p id="desc">
-          This is the dialog content. User can change dialog resize behavior, cancel behavior and drag
-          behavior by setting attributes. Default attribute value depends on the theme.
-      </p>
+        <oj-form-layout>
+            <oj-text-area id="text-area" readonly="true" rows="3" label-hint="error"></oj-text-area>
+        </oj-form-layout>
     </div>
     <div slot="footer">
       <oj-button id="okButton" chroming="callToAction" on-oj-action="[[closeDialog]]">Close</oj-button>
     </div>
-</oj-dialog>   
-
+</oj-dialog>

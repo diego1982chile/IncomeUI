@@ -21,8 +21,8 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
         
         self.pivoted = ko.observable(false);
         
-        self.KnockoutTemplateUtils = KnockoutTemplateUtils;
-                             
+        self.KnockoutTemplateUtils = KnockoutTemplateUtils;                
+                                             
         self.dataSource = ko.computed(function () {
             
             //console.log(JSON.stringify(params));            
@@ -33,7 +33,7 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
             var year = params.yearModel().get('year');                                                                 
  
             var collection = new Model.Collection(null, {
-              url: "http://192.168.0.5:8080/IncomeService/api/fees/" + year
+              url: "http://192.168.0.9:8080/IncomeService/api/fees/" + year
             });
             
             console.log(collection);
@@ -66,13 +66,16 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
         self.getCellClassName = function (cellContext) {
             var key = cellContext.keys.column;
             return 'oj-helper-justify-content-center';                        
-        };            
-       
+        }; 
         
-        self.submitPayment = function (event, data) {
-            
-
-        }
+        $(document).ready(function() {
+            alert("mmm");
+            $(".oj-button-button").click(function() {
+                 alert("hola!");
+                 var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
+                 rootViewModel.router.go({path: 'payments'});
+            }); 
+        });                
                                    
     }  
        
