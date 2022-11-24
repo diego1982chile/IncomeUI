@@ -41,14 +41,14 @@
             </script>
           
             <script type="text/html" id="cell_template">              
-                <oj-bind-if test="[[$data == 0]]">                  
+                <oj-bind-if test="[[$data.payment == 0]]">                  
                   <span>                      
-                      <oj-button chroming="outlined" on-oj-action="[[]]" class="gotoPayButton">                      
+                      <oj-button chroming="outlined" on-oj-action="[[goToAccounts]]" class="goToAccounts">                      
                         Pagar
                       </oj-button>                      
                   </span>
                 </oj-bind-if>     
-                <oj-bind-if test="[[$data != 0]]">
+                <oj-bind-if test="[[$data.payment != 0]]">
                     <span> <oj-bind-text value="[[$data]]"></oj-bind-text></span>
                 </oj-bind-if>              
             </script> 

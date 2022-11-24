@@ -20,7 +20,7 @@ define(['knockout',
 
  function(ko, PagingDataProviderView, CollectionDataProvider) {
      
-    function housesViewModel() {
+    function paymentsViewModel(params) {
         
        var self = this;             
         
@@ -37,9 +37,9 @@ define(['knockout',
         /* Variables */        
         //self.selectedTabItem = ko.observable("settings");
         //self.backTestListDataSource = ko.observable();
-        self.selectedHouse = ko.observable();
-        self.selectedHouseModel = ko.observable();
-        self.houseList = ko.observable();        
+        self.selectedPayment = ko.observable();
+        self.selectedPaymentModel = ko.observable();
+        self.paymentList = ko.observable();        
         
         self.selectionRequired = ko.observable(false);
         
@@ -54,16 +54,16 @@ define(['knockout',
         }
         
         /* List selection listener */        
-        self.houseListSelectionChanged = function () {                                       
+        self.paymentListSelectionChanged = function () {                                       
                         
-            self.selectedHouseModel(self.houseList().get(self.selectedHouse()));                        
+            self.selectedPaymentModel(self.paymentList().get(self.selectedPayment()));                        
                                                               
             // Check if the selected ticket exists within the tab data
             var match = ko.utils.arrayFirst(self.tabData(), function (item) {
-              return item.id === self.selectedHouse();
+              return item.id === self.selectedPayment();
             });
             
-            console.log(JSON.stringify(self.houseList()));
+            console.log(JSON.stringify(self.paymentList()));
 
             if (!match) { 
                 
@@ -71,51 +71,51 @@ define(['knockout',
                     self.tabData.pop();
                 }                    
 
-                var name = "New House";
+                var name = "New Payment";
                     
-                console.log(self.houseList().get(self.selectedHouse()));
+                console.log(self.paymentList().get(self.selectedPayment()));
                 
-                if(self.selectedHouse() && self.selectedHouse() != -1) {                                        
-                    name = "House " + self.houseList().get(self.selectedHouse()).get("number");
+                if(self.selectedPayment() && self.selectedPayment() != -1) {                                        
+                    name = "Payment " + self.paymentList().get(self.selectedPayment()).get("id");
                 }
                 
                 self.tabData.push({
-                  "house": name,
-                  "id": self.selectedHouse()
+                  "payment": name,
+                  "id": self.selectedPayment()
                 });
                                 
             }
             
-            self.selectedTabItem(self.selectedHouse());                        
+            self.selectedTabItem(self.selectedPayment());                        
         }; 
         
-        self.houseListDataSource = ko.computed(function () {
+        self.paymentListDataSource = ko.computed(function () {
            /* List View Collection and Model */
-            var houseModelItem = oj.Model.extend({
+            var paymentModelItem = oj.Model.extend({
                 idAttribute: 'id'
             });
 
-            var houseListCollection = new oj.Collection(null, {
+            var paymentListCollection = new oj.Collection(null, {
                 url: "http://192.168.0.9:8080/IncomeService/api/houses/",
-                model: houseModelItem
+                model: paymentModelItem
             });                        
 
-            self.houseList = ko.observable(houseListCollection);  
+            self.paymentList = ko.observable(paymentListCollection);  
             
             self.sleep(500).then(() => {
-                if(self.houseList().length == 0) {  
+                if(self.paymentList().length == 0) {  
                     $("#newButton").trigger("click");
                 }
             });            
 
             //self.backTestListDataSource(new oj.CollectionTableDataSource(self.backTestList()));   
-            return new PagingDataProviderView(new CollectionDataProvider(self.houseList()));
+            return new PagingDataProviderView(new CollectionDataProvider(self.paymentList()));
             //return new CollectionDataProvider(self.houseList());
         });  
         
         
         /* New house listener */        
-        self.newHouse = function () {
+        self.newPayment = function () {
             
             self.sleep(500).then(() => {                
                 $(".oj-pagingcontrol-nav-last").removeClass("oj-disabled");
@@ -124,20 +124,20 @@ define(['knockout',
                 });                
             });
             
-            var house = {};                        
+            var payment = {};                        
             
-            house.id = -1;
-            house.number = "New";
-            house.debts = [];
-            house.neighbors = [];       
+            payment.id = -1;
+            payment.number = "New";
+            payment.debts = [];
+            payment.neighbors = [];       
             
-            self.houseList().push(house)
+            self.paymentList().push(house)
             
-            console.log(self.houseList());                                    
+            console.log(self.paymentList());                                    
              
-            self.selectedHouseModel(house);                        
+            self.selectedPaymentModel(house);                        
             
-            self.selectedHouse([-1]);                            
+            self.selectedPayment([-1]);                            
                                                                               
         };                         
 
@@ -156,7 +156,7 @@ define(['knockout',
                  /* Check if the current selected list item matches the open tab,
                     if so, reset to the first index in the list
                   */
-                  if(id === self.selectedHouse() || self.selectedHouse() !== self.selectedTabItem()){                         
+                  if(id === self.selectedPayment() || self.selectedPayment() !== self.selectedTabItem()){                         
                         self.selectedTabItem(self.tabData()[0].id);
                   }
 
@@ -179,11 +179,9 @@ define(['knockout',
         };
 
         self.tabSelectionChanged = function () {               
-            self.selectedHouseModel(self.houseList().get(self.selectedTabItem())); 
+            self.selectedPaymentModel(self.paymentList().get(self.selectedTabItem())); 
             self.tabBarDataSource.reset();
-        } 
-        
-
+        }         
                 
     }
         
@@ -192,6 +190,6 @@ define(['knockout',
      * return a constructor for the ViewModel so that the ViewModel is constructed
      * each time the view is displayed.
      */
-    return housesViewModel;
+    return paymentsViewModel;
         
 });

@@ -12,12 +12,23 @@ define(['knockout', 'ojs/ojmodel', 'ojs/ojknockouttemplateutils',
         'ojs/ojdatagrid', "ojs/ojbutton"], 
     
 function (ko, Model, KnockoutTemplateUtils, collectionModule) {
+    
+    
+    var rootViewModel = ko.dataFor(document.getElementById('globalBody'));
+
+    // Create a child router with one default path
+    this.childRouter = rootViewModel.router.createChildRouter([
+        { path: 'payments' },
+    ]);
+    
     /**
      * The view model for the main content view template
      */        
     function feesViewModel(params) {
         
-        var self = this;        
+        var self = this;           
+        
+        rootViewModel.router.sync();
         
         self.pivoted = ko.observable(false);
         
@@ -66,18 +77,16 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
         self.getCellClassName = function (cellContext) {
             var key = cellContext.keys.column;
             return 'oj-helper-justify-content-center';                        
-        }; 
-        
-        $(document).ready(function() {
-            alert("mmm");
-            $(".oj-button-button").click(function() {
-                 alert("hola!");
-                 var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
-                 rootViewModel.router.go({path: 'payments'});
-            }); 
-        });                
+        };                 
+                       
                                    
     }  
+    
+    this.goToAccounts = (event, data) => {                    
+        alert(JSON.stringify(data));
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
+        rootViewModel.router.go({path: 'payments', params: { feeId: data.id }});        
+    };
        
     return feesViewModel;
 });

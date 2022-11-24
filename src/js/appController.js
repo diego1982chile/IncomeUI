@@ -34,10 +34,11 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
       this.mdScreen = ResponsiveKnockoutUtils.createMediaQueryObservable(mdQuery);
 
       let navData = [
-        { path: '', redirect: 'houses' },
-        { path: 'dashboard', detail: { label: 'Dashboard', iconClass: 'oj-ux-ico-bar-chart' } },
-        { path: 'houses', detail: { label: 'Houses', iconClass: 'oj-ux-ico-fire' } },             
-        { path: 'about', detail: { label: 'About', iconClass: 'oj-ux-ico-information-s' } }
+        { path: '', redirect: 'dashboard' },
+        { path: 'dashboard', id: 'dashboard', detail: { label: 'Dashboard', iconClass: 'oj-ux-ico-bar-chart' } },
+        { path: 'houses', id: 'houses', detail: { label: 'Houses', iconClass: 'oj-ux-ico-fire' } },                     
+        { path: 'payments', id: 'payments', detail: { label: 'Payments', iconClass: 'oj-ux-ico-fire' } },          
+        { path: 'about', id: 'about', detail: { label: 'About', iconClass: 'oj-ux-ico-information-s' } }
       ];
 
       // Router setup
@@ -63,11 +64,16 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
         selector: '#navDrawer',
         content: '#pageContent'
       };
+      
       // Called by navigation drawer toggle button and after selection of nav drawer item
       this.toggleDrawer = () => {
         this.navDrawerOn = true;
         return OffcanvasUtils.toggle(this.drawerParams);
       }
+      
+      $(document).ready(function() {         
+         $('#ui-id-17').hide();
+      });
 
       // Header
       // Application Name used in Branding Area
