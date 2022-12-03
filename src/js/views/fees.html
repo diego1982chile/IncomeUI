@@ -13,6 +13,10 @@
     align-items: center !important;
     box-sizing: border-box;
 }
+
+.highlight-cell {
+    background-color: #F0FCED;
+}
     
 </STYLE>
 
@@ -27,9 +31,9 @@
               dnd.reorder.row="enable"
               header.column.renderer="[[KnockoutTemplateUtils.getRenderer('header_template')]]"
               header.column.style="width:83px;justify-content: center;"              
-              header.row.style="width:83px; height:50px"
+              header.row.style="width:83px; height:50px"              
               header.column.resizable.width="enable"
-              header.column.resizable.height="enable"
+              header.column.resizable.height="enable"              
               cell.renderer="[[KnockoutTemplateUtils.getRenderer('cell_template')]]"
               cell.class-name="[[getCellClassName]]">                  
             </oj-data-grid>
@@ -49,7 +53,9 @@
                   </span>
                 </oj-bind-if>     
                 <oj-bind-if test="[[$data.payment != 0]]">
-                    <span> <oj-bind-text value="[[$data]]"></oj-bind-text></span>
+                    <oj-button chroming="borderless" on-oj-action="[[goToAccounts]]" class="goToAccounts">                      
+                        <oj-bind-text value="[[$data.payment]]"></oj-bind-text>
+                    </oj-button>                        
                 </oj-bind-if>              
             </script> 
         </div>

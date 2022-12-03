@@ -13,7 +13,8 @@ define(['ojs/ojcore','knockout',
         'ojs/ojarraydataprovider','ojs/ojcollectiondataprovider',
         "ojs/ojradioset",
         "ojs/ojswitcher",
-        'ojs/ojcollapsible',"ojs/ojdialog",'ojs/ojmessages','ojs/ojpopup',
+        'ojs/ojcollapsible',"ojs/ojdialog",'ojs/ojmessages','ojs/ojpopup',        
+        "ojs/ojselectsingle", "ojs/ojcheckboxset",
         'ojs/ojconverter-number','ojs/ojchart','ojs/ojformlayout',"ojs/ojinputnumber"], 
     
 function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, CollectionDataProvider, NumberConverter) {
@@ -27,38 +28,42 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         /* Variables */
         self.id = ko.observable(null);
         
-        self.number = ko.observable(null);
+        self.house = ko.observable();
+        
+        self.year = ko.observable();        
+        
+        self.neighbors = ko.observableArray();
+        
+        self.neighbor = ko.observable();        
+        
+        self.amount = ko.observable();
+        
+        self.totalAmount = ko.observableArray(["total"]);
+        
+        self.disabled = ko.observable(true);
                                                     
-        self.houseModel = ko.observable();
-              
-        self.dataProvider = ko.observableArray();                
-        
-        self.tabs = ko.observableArray();        
-        
-        self.selectedItem = ko.observable("neighbors-tab");                
+        self.feeModel = ko.observable();                            
         
         self.messages = ko.observableArray();
   
         self.messagesDataprovider = new ArrayDataProvider(self.messages);
         
-        self.dataProvider = new ArrayDataProvider(self.tabs, { keyAttributes: "id" });
-        
         self.removeMsgs = function (event) {            
             self.messages([]);                        
         }
         
-        self.refreshHouseList = (house) => {  
-            params.houseList().pop();
-            params.houseList().push(house);            
+        self.refreshPaymentList = (payment) => {  
+            params.paymentList().pop();
+            params.paymentList().push(payment);            
             //$(".oj-pagingcontrol-nav-last").trigger("click");
-            params.selectedHouse([house.id]);
+            params.selectedPayment([payment.id]);
         };
         
-        self.removeFromHouseList = (id) => {                         
-            params.houseList().remove(id);
-            params.selectedHouse([]);
+        self.removeFromPaymentList = (id) => {                         
+            params.paymentList().remove(id);
+            params.selectedPayhment([]);
             self.sleep(500).then(() => {   
-                if(params.houseList().length == 0) { 
+                if(params.paymentList().length == 0) { 
                     $("#newButton").trigger("click");  
                 }
             }); 
@@ -67,29 +72,52 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                         
         ko.computed(function () {
             
-            //self.removeMsgs();                   
+            if(params.feeModel() === undefined) {                
+                return;
+            }                        
             
-            //alert(JSON.stringify(params.houseModel()));
+            self.feeModel(params.feeModel());
             
-            var url = "http://192.168.0.9:8080/IncomeService/api/houses/new";                                                 
+            self.house(params.feeModel().house.number);
+            
+            self.year(params.feeModel().year.year + " - " + params.feeModel().month.name);
+            
+            //alert(JSON.stringify(params.feeModel().house.neighbors));                        
+            
+            self.neighbors(new ArrayDataProvider(
+                params.feeModel().house.neighbors,
+                {idAttribute: 'id'}));
+                
+            self.amount(params.feeModel().amount);
+            
+            //self.month(params.feeModel().month.name);
+            
+            //alert("self.feeModel().month.name = " + self.feeModel().month.name);
+            
+            //alert("feeModel = " + JSON.stringify(self.feeModel()));
+            
+            //self.year = params.feeModel().year.year;
+            
+            //self.removeMsgs();                                           
+            
+            var url = "http://192.168.0.9:8080/IncomeService/api/payments/new";                                                 
             
             try {
-                var houseId = params.houseModel().get('id');    
-                url = "http://192.168.0.9:8080/IncomeService/api/houses/" + houseId;                                                 
+                var paymentId = params.paymentModel().get('id');    
+                url = "http://192.168.0.9:8080/IncomeService/api/payments/" + params.feeModel().id;                                                 
             }                        
             catch(err) {                
                 
             }
             
-            $.getJSON(url).then(function (house) {                       
-                console.log(JSON.stringify(house));                
-                self.houseModel(house);                                       
-                self.id(house.id)
-                self.number(house.number);         
+            $.getJSON(url).then(function (payment) {                       
+                console.log(JSON.stringify(payment));                
+                self.paymentModel(payment);                                       
+                self.id(payment.id)                        
                 
-                //alert(JSON.stringify(house));
+                alert(JSON.stringify(payment));
                 
-                if(house.persisted) {                    
+                if(payment.persisted) {                    
                     $("#deleteButton").show();
                 }
                 else {
@@ -97,53 +125,56 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 }                
               
             });
-                 
-            self.tabs([{ name: "Neighbors", id: "neighbors-tab" }, { name: "Debts", id: "debts-tab" }]);                        
+                             
         });   
        
          
-        self.submitHouse = function (event, data) {
+        self.submitFee = function (event, data) {
             
-            let number = document.getElementById("number");
+            let neighbor = document.getElementById("neighbor");
             
-            number.validate().then((result3) => { 
+            let amount = document.getElementById("amount");
+            
+            neighbor.validate().then((result3) => {   
                 
-                if(result3 === 'invalid') {
-                    return false;
-                }
-                
-                if(self.houseModel().neighbors.length === 0) {                    
-                    self.messages([{severity: 'error', summary: 'Invalid Data', detail: 'Must provide at least one neighbor', autoTimeout: 5000}]);                     
-                    return false;
-                }
-                
-                var house = {};                                
+                amount.validate().then((result4) => { 
+            
+                    if(result3 === 'invalid' || result4 === 'invalid') {
+                        return false;
+                    }
 
-                house.id = self.id();
-                house.number = self.number();
-                house.debts = self.houseModel().debts;
-                house.neighbors = self.houseModel().neighbors;   
-                
-                $.ajax({                    
-                    type: "POST",
-                    url: "http://192.168.0.9:8080/IncomeService/api/houses/save",                                        
-                    dataType: "json",      
-                    data: JSON.stringify(house),			  		 
-                    //crossDomain: true,
-                    contentType : "application/json",                    
-                    success: function(newHouse) {                                            
-                        self.messages([{severity: 'info', summary: 'Succesful Action', detail: "house saved successfuly", autoTimeout: 5000}]);
-                        self.refreshHouseList(newHouse);                        
-                    },
-                    error: function (request, status, error) {
-                        //alert(JSON.stringify(request));                          
-                        //alert(request.responseText);     
-                        self.messages([{severity: 'error', summary: 'Service Error', detail: request.responseText, autoTimeout: 5000}]);
-                    }                                  
-                });            
-                
+                    var payment = {};                                
+
+                    payment.id = self.id();
+                    payment.neighbor = self.getNeighborById(self.neighbor());
+                    payment.amount = self.amount(); 
+
+                    params.feeModel().payments.push(payment);
+
+                    alert(JSON.stringify(payment));
+
+                    $.ajax({                    
+                        type: "POST",
+                        url: "http://192.168.0.9:8080/IncomeService/api/fees/save",                                        
+                        dataType: "json",      
+                        data: JSON.stringify(params.feeModel()),			  		 
+                        //crossDomain: true,
+                        contentType : "application/json",                    
+                        success: function(newHouse) {                                            
+                            self.messages([{severity: 'info', summary: 'Succesful Action', detail: "payment saved successfuly", autoTimeout: 5000}]);
+                            self.refreshHouseList(newHouse);                        
+                        },
+                        error: function (request, status, error) {
+                            //alert(JSON.stringify(request));                          
+                            //alert(request.responseText);     
+                            self.messages([{severity: 'error', summary: 'Service Error', detail: request.responseText, autoTimeout: 5000}]);
+                        }                                  
+                    });                   
+                    
+                });  
+            
             });
-                        
+                                       
         }
         
         self.removeHouse = function (event, data) {             
@@ -179,8 +210,32 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         self.sleep = (ms) => {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+        
+        self.getItemText = function (itemContext) {
+            return itemContext.data.name;
+        };
+
+        self.disableControls = ko.computed(() => {
+            return self.totalAmount()[0];
+        })
+        
+        self.getNeighborById = (id) => {                      
+            
+            var toReturn; 
+                 
+            $(self.feeModel().house.neighbors).each(function(key,value) {                                 
+                
+                if(value.id === id) {                    
+                    toReturn = value;
+                    return false;
+                }                
+            });                        
+            
+            return toReturn;
+                                                                           
+        };
                                             
-    }    
+    }        
        
     return houseContentViewModel;
 });

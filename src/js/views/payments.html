@@ -45,7 +45,7 @@
                 <script type="text/html" id="ticket-list-template">
                     <li data-bind="attr: {id: $data['id']}">                      
                       <div class="oj-flex oj-sm-padding-2x-top oj-sm-padding-2x-bottom">
-                        <oj-bind-text value="[['Payment '+number]]"></oj-bind-text>                        
+                        <oj-bind-text value="[['Payment ' + id]]"></oj-bind-text>                        
                       </div>
                     </li>
                 </script>
@@ -87,7 +87,9 @@
         <!-- Tab Bar-->
         
         <div class="oj-panel oj-flex-item" id="payment">
-            <div data-bind="ojModule: { name: 'payment', params: {paymentModel: selectedPaymentModel, paymentList: paymentList, selectedPayment: selectedPayment} }"
+            <div data-bind="ojModule: { name: 'payment', params: 
+                        {paymentModel: selectedPaymentModel, paymentList: paymentList, 
+                    selectedPayment: selectedPayment, feeModel: feeModel} }"
             class="oj-sm-padding-4x">
             </div>
         </div>

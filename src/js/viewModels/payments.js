@@ -20,9 +20,11 @@ define(['knockout',
 
  function(ko, PagingDataProviderView, CollectionDataProvider) {
      
-    function paymentsViewModel(params) {
+    function paymentsViewModel(args) {
         
-       var self = this;             
+        var self = this;             
+        
+        self.feeModel = ko.observable();
         
         self.selectedTabItem = ko.observable();
         
@@ -75,7 +77,7 @@ define(['knockout',
                     
                 console.log(self.paymentList().get(self.selectedPayment()));
                 
-                if(self.selectedPayment() && self.selectedPayment() != -1) {                                        
+                if(self.selectedPayment() && self.selectedPayment() != -1) {                       
                     name = "Payment " + self.paymentList().get(self.selectedPayment()).get("id");
                 }
                 
@@ -90,13 +92,16 @@ define(['knockout',
         }; 
         
         self.paymentListDataSource = ko.computed(function () {
+            
+            var fee = args.params.fee;
+                        
            /* List View Collection and Model */
             var paymentModelItem = oj.Model.extend({
                 idAttribute: 'id'
             });
 
             var paymentListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.9:8080/IncomeService/api/houses/",
+                url: "http://192.168.0.9:8080/IncomeService/api/payments/" + fee,
                 model: paymentModelItem
             });                        
 
@@ -113,8 +118,21 @@ define(['knockout',
             //return new CollectionDataProvider(self.houseList());
         });  
         
+        ko.computed(function () {
+            
+            var feeId = args.params.fee;            
+                        
+            $.getJSON("http://192.168.0.9:8080/IncomeService/api/fees/" + feeId)
+                    .then(function (fee) {       
+                //alert("fee = " + JSON.stringify(fee));
+                self.feeModel(fee);                
+            });
+            
+            
+        });
         
-        /* New house listener */        
+        
+        /* New payment listener */        
         self.newPayment = function () {
             
             self.sleep(500).then(() => {                
@@ -126,16 +144,13 @@ define(['knockout',
             
             var payment = {};                        
             
-            payment.id = -1;
-            payment.number = "New";
-            payment.debts = [];
-            payment.neighbors = [];       
+            payment.id = "New";            
             
-            self.paymentList().push(house)
+            self.paymentList().push(payment)
             
             console.log(self.paymentList());                                    
              
-            self.selectedPaymentModel(house);                        
+            self.selectedPaymentModel(payment);                        
             
             self.selectedPayment([-1]);                            
                                                                               

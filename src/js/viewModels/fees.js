@@ -44,7 +44,7 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
             var year = params.yearModel().get('year');                                                                 
  
             var collection = new Model.Collection(null, {
-              url: "http://192.168.0.9:8080/IncomeService/api/fees/" + year
+              url: "http://192.168.0.9:8080/IncomeService/api/feesDTO/" + year
             });
             
             console.log(collection);
@@ -74,18 +74,22 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
         };
             
             
-        self.getCellClassName = function (cellContext) {
-            var key = cellContext.keys.column;
-            return 'oj-helper-justify-content-center';                        
+        self.getCellClassName = function (cellContext) {                        
+            if(cellContext.data.payment > 0) {
+                return 'highlight-cell';                        
+            }
+            else {
+                return 'oj-helper-justify-content-center';                        
+            }
+            
         };                 
                        
                                    
     }  
     
-    this.goToAccounts = (event, data) => {                    
-        alert(JSON.stringify(data));
+    this.goToAccounts = (event, data) => {                            
         var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
-        rootViewModel.router.go({path: 'payments', params: { feeId: data.id }});        
+        rootViewModel.router.go({path: 'payments', params: { fee: data.id }});        
     };
        
     return feesViewModel;
