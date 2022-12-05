@@ -14,8 +14,26 @@
     box-sizing: border-box;
 }
 
-.highlight-cell {
-    background-color: #F0FCED;
+.link-button .oj-button-text {
+    color: #02629f !important;
+    cursor:pointer;
+}
+
+.link-button .oj-button-text:hover {
+    text-decoration:underline;    
+}
+
+
+.link-button button {
+    border: 0px !important;    
+}
+
+.oj-datagrid-cell {
+    justify-content: center
+}
+
+.oj-datagrid-header-cell {
+    
 }
     
 </STYLE>
@@ -25,15 +43,12 @@
             <oj-data-grid id="datagrid" 
               style="width:100%;height:400px;max-width:1100px;" 
               aria-label="Data Grid Formatted Row Based Grid Demo"
-              data="[[dataSource]]" 
-              selection-mode.row="multiple"
-              banding-interval.row="1"
-              dnd.reorder.row="enable"
+              selection-mode.cell="single"
+              data="[[dataSource]]"              
+              banding-interval.row="1"              
               header.column.renderer="[[KnockoutTemplateUtils.getRenderer('header_template')]]"
               header.column.style="width:83px;justify-content: center;"              
-              header.row.style="width:83px; height:50px"              
-              header.column.resizable.width="enable"
-              header.column.resizable.height="enable"              
+              header.row.style="width:83px; height:45px"                                          
               cell.renderer="[[KnockoutTemplateUtils.getRenderer('cell_template')]]"
               cell.class-name="[[getCellClassName]]">                  
             </oj-data-grid>
@@ -47,15 +62,15 @@
             <script type="text/html" id="cell_template">              
                 <oj-bind-if test="[[$data.payment == 0]]">                  
                   <span>                      
-                      <oj-button chroming="outlined" on-oj-action="[[goToAccounts]]" class="goToAccounts">                      
+                      <oj-button chroming="outlined" on-oj-action="[[goToAccounts]]" class="oj-button-sm">                      
                         Pagar
                       </oj-button>                      
                   </span>
                 </oj-bind-if>     
                 <oj-bind-if test="[[$data.payment != 0]]">
-                    <oj-button chroming="borderless" on-oj-action="[[goToAccounts]]" class="goToAccounts">                      
-                        <oj-bind-text value="[[$data.payment]]"></oj-bind-text>
-                    </oj-button>                        
+                    <oj-button chroming="borderless" on-oj-action="[[goToAccounts]]" class="link-button">                      
+                        <oj-bind-text value="[[$data.payment]]" style="color:red"></oj-bind-text>                    
+                    </oj-button>                                          
                 </oj-bind-if>              
             </script> 
         </div>

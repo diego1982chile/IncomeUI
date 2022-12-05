@@ -80,9 +80,14 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
             }
             else {
                 return 'oj-helper-justify-content-center';                        
-            }
-            
-        };                 
+            }            
+        };   
+        
+                
+        self.selectionChangedListener = (event, data) => {                        
+            var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
+            rootViewModel.router.go({path: 'payments', params: { fee: data.id }}); 
+        };
                        
                                    
     }  

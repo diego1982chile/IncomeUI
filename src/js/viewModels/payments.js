@@ -39,7 +39,7 @@ define(['knockout',
         /* Variables */        
         //self.selectedTabItem = ko.observable("settings");
         //self.backTestListDataSource = ko.observable();
-        self.selectedPayment = ko.observable();
+        self.selectedPayment = ko.observable([-1]);
         self.selectedPaymentModel = ko.observable();
         self.paymentList = ko.observable();        
         
@@ -48,7 +48,7 @@ define(['knockout',
         self.pagingLayout = { layout: ['nav'], maxPageLinks: 5 };
         
         /* Tab Component */
-        self.tabData = ko.observableArray([]);
+        self.tabData = ko.observableArray([{"payment": "New Payment", "id": [-1]}]);
         self.tabBarDataSource = new oj.ArrayTableDataSource(self.tabData, { idAttribute: 'id' });
         
         self.sleep = (ms) => {
@@ -56,7 +56,7 @@ define(['knockout',
         }
         
         /* List selection listener */        
-        self.paymentListSelectionChanged = function () {                                       
+        self.paymentListSelectionChanged = function () {                          
                         
             self.selectedPaymentModel(self.paymentList().get(self.selectedPayment()));                        
                                                               
@@ -65,22 +65,20 @@ define(['knockout',
               return item.id === self.selectedPayment();
             });
             
-            console.log(JSON.stringify(self.paymentList()));
+            console.log(JSON.stringify(self.paymentList()));                        
 
-            if (!match) { 
+            if (!match) {                                 
                 
                 while(self.tabData().length > 0) {                    
                     self.tabData.pop();
                 }                    
 
-                var name = "New Payment";
-                    
-                console.log(self.paymentList().get(self.selectedPayment()));
+                var name = "New Payment";                                    
                 
-                if(self.selectedPayment() && self.selectedPayment() != -1) {                       
-                    name = "Payment " + self.paymentList().get(self.selectedPayment()).get("id");
+                if(self.selectedPayment() && self.selectedPayment() != -1) {                             
+                    name = "Payment " + self.paymentList().get(self.selectedPayment()).get("number");
                 }
-                
+                                
                 self.tabData.push({
                   "payment": name,
                   "id": self.selectedPayment()
@@ -101,11 +99,12 @@ define(['knockout',
             });
 
             var paymentListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.9:8080/IncomeService/api/payments/" + fee,
+                url: "http://192.168.0.9:8080/IncomeService/api/payments/fee/" + fee,
                 model: paymentModelItem
             });                        
 
-            self.paymentList = ko.observable(paymentListCollection);  
+            self.paymentList = ko.observable(paymentListCollection);
+                        
             
             self.sleep(500).then(() => {
                 if(self.paymentList().length == 0) {  
@@ -144,7 +143,9 @@ define(['knockout',
             
             var payment = {};                        
             
-            payment.id = "New";            
+            payment.id = -1;
+            
+            payment.number = "New";            
             
             self.paymentList().push(payment)
             
@@ -152,7 +153,9 @@ define(['knockout',
              
             self.selectedPaymentModel(payment);                        
             
-            self.selectedPayment([-1]);                            
+            self.selectedPayment([-1]);    
+            
+            //self.paymentListSelectionChanged();
                                                                               
         };                         
 

@@ -54,7 +54,7 @@ define(['knockout',
         }
         
         /* List selection listener */        
-        self.houseListSelectionChanged = function () {                                       
+        self.houseListSelectionChanged = function () {                         
                         
             self.selectedHouseModel(self.houseList().get(self.selectedHouse()));                        
                                                               

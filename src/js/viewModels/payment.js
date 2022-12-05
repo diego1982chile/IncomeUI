@@ -34,6 +34,10 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         
         self.neighbors = ko.observableArray();
         
+        self.number = ko.observable();    
+        
+        self.datetime = ko.observable();
+        
         self.neighbor = ko.observable();        
         
         self.amount = ko.observable();
@@ -52,11 +56,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             self.messages([]);                        
         }
         
-        self.refreshPaymentList = (payment) => {  
+        self.refreshPaymentList = (payment) => {              
             params.paymentList().pop();
             params.paymentList().push(payment);            
             //$(".oj-pagingcontrol-nav-last").trigger("click");
-            params.selectedPayment([payment.id]);
+            //params.selectedPayment([payment.id]);
         };
         
         self.removeFromPaymentList = (id) => {                         
@@ -70,11 +74,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         };
        
                         
-        ko.computed(function () {
+        ko.computed(function () {                        
             
             if(params.feeModel() === undefined) {                
                 return;
-            }                        
+            }    
             
             self.feeModel(params.feeModel());
             
@@ -86,36 +90,32 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             
             self.neighbors(new ArrayDataProvider(
                 params.feeModel().house.neighbors,
-                {idAttribute: 'id'}));
+                {idAttribute: 'id'}));                            
                 
-            self.amount(params.feeModel().amount);
+            self.amount(params.feeModel().amount); 
+            self.neighbor(null);
             
-            //self.month(params.feeModel().month.name);
-            
-            //alert("self.feeModel().month.name = " + self.feeModel().month.name);
-            
-            //alert("feeModel = " + JSON.stringify(self.feeModel()));
-            
-            //self.year = params.feeModel().year.year;
-            
-            //self.removeMsgs();                                           
-            
-            var url = "http://192.168.0.9:8080/IncomeService/api/payments/new";                                                 
+            var url = "http://192.168.0.9:8080/IncomeService/api/payments/new/" + params.feeModel().id;                                                                         
             
             try {
                 var paymentId = params.paymentModel().get('id');    
-                url = "http://192.168.0.9:8080/IncomeService/api/payments/" + params.feeModel().id;                                                 
+                url = "http://192.168.0.9:8080/IncomeService/api/payments/" + params.selectedPayment();                                                 
             }                        
             catch(err) {                
                 
             }
             
-            $.getJSON(url).then(function (payment) {                       
-                console.log(JSON.stringify(payment));                
-                self.paymentModel(payment);                                       
-                self.id(payment.id)                        
+            $.getJSON(url).then(function (payment) {                                       
+                //alert(payment.number);
+                console.log(JSON.stringify(payment));                                      
+                //self.paymentModel(payment);                                  
+                self.id(payment.id);                                           
+                self.number(payment.number);                
+                self.datetime(payment.datetime);  
                 
-                alert(JSON.stringify(payment));
+                if(payment.neighbor) {
+                    self.neighbor(payment.neighbor.id);                                
+                }                                                
                 
                 if(payment.persisted) {                    
                     $("#deleteButton").show();
@@ -135,23 +135,25 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             
             let amount = document.getElementById("amount");
             
+            $("#amount").prop( "disabled", false );
+            
             neighbor.validate().then((result3) => {   
                 
-                amount.validate().then((result4) => { 
+                amount.validate().then((result4) => {                                         
             
                     if(result3 === 'invalid' || result4 === 'invalid') {
+                        $("#amount").prop( "disabled", true );
                         return false;
-                    }
+                    }                                        
 
                     var payment = {};                                
 
                     payment.id = self.id();
                     payment.neighbor = self.getNeighborById(self.neighbor());
                     payment.amount = self.amount(); 
+                    payment.number = self.number();
 
-                    params.feeModel().payments.push(payment);
-
-                    alert(JSON.stringify(payment));
+                    params.feeModel().payments.push(payment);                   
 
                     $.ajax({                    
                         type: "POST",
@@ -160,9 +162,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                         data: JSON.stringify(params.feeModel()),			  		 
                         //crossDomain: true,
                         contentType : "application/json",                    
-                        success: function(newHouse) {                                            
-                            self.messages([{severity: 'info', summary: 'Succesful Action', detail: "payment saved successfuly", autoTimeout: 5000}]);
-                            self.refreshHouseList(newHouse);                        
+                        success: function(fee) {                                            
+                            self.messages([{severity: 'confirmation', summary: 'Succesful Action', detail: "payment saved successfuly", autoTimeout: 5000}]);                                                    
+                            //params.paymentList(fee.payments);                            
+                            //params.selectedPayment([self.getPaymentByNumber(fee, self.number()).id]); 
+                            self.refreshPaymentList(self.getPaymentByNumber(fee, self.number()));
                         },
                         error: function (request, status, error) {
                             //alert(JSON.stringify(request));                          
@@ -177,25 +181,32 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                                        
         }
         
-        self.removeHouse = function (event, data) {             
+        self.removePayment = function (event, data) {             
             
-            var id = params.houseModel().get("id");
-                
+            var id = self.id();
+            
+            self.deletePayment(id);
+            
+            alert(JSON.stringify(params.feeModel().payments));
+                        
+            
             $.ajax({                    
-                type: "DELETE",
-                url: "http://192.168.0.9:8080/IncomeService/api/houses/delete/" + id,                                        
-                dataType: "json",      		  		 
+                type: "POST",
+                url: "http://192.168.0.9:8080/IncomeService/api/fees/save",                                        
+                dataType: "json",      
+                data: JSON.stringify(params.feeModel()),			  		 
                 //crossDomain: true,
                 contentType : "application/json",                    
-                success: function(id) {                                        
-                    self.messages([{severity: 'info', summary: 'Succesful Action', detail: "house removed successfuly", autoTimeout: 5000}]);
-                    self.removeFromHouseList(id);                        
+                success: function(fee) {                                            
+                    self.messages([{severity: 'info', summary: 'Succesful Action', detail: "payment removed successfuly", autoTimeout: 5000}]);
+                    self.removeFromPaymentList(id);        
                 },
                 error: function (request, status, error) {
+                    //alert(JSON.stringify(request));                          
+                    //alert(request.responseText);     
                     self.messages([{severity: 'error', summary: 'Service Error', detail: request.responseText, autoTimeout: 5000}]);
-                    //alert(request.responseText);                          
                 }                                  
-            });                     
+            });                                     
                         
         }
         
@@ -231,9 +242,44 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 }                
             });                        
             
-            return toReturn;
-                                                                           
+            return toReturn;                                                                           
         };
+        
+        self.getPaymentByNumber = (fee, number) => {                      
+            
+            var toReturn; 
+                 
+            $(fee.payments).each(function(key,value) {                                 
+                
+                if(value.number === number) {                    
+                    toReturn = value;
+                    return false;
+                }                
+            });                        
+            
+            return toReturn;                                                                           
+        };
+        
+        self.deletePayment = (key) => {                                       
+                 
+            var index = 0;
+            var found = false;
+
+            $(params.feeModel().payments).each(function(k,value) {                 
+                if(value.id === key) {                    
+                    found = true;
+                    return false;
+                }          
+                index++;
+            }); 
+            
+            alert(found);
+            
+            if(found) {
+                params.feeModel().payments.splice(index,1);                
+            }            
+        };
+
                                             
     }        
        

@@ -40,7 +40,23 @@ and open the template in the editor.
         <h1 slot="header" class="oj-typography-heading-sm oj-header-border">Payment Data</h1>
             
         <oj-form-layout id="ofl1" label-edge="start" max-columns="1" 
-            class="oj-form-control-full-width">  
+            class="oj-form-control-full-width"> 
+            
+            <oj-input-text
+                id="number"
+                value="{{number}}"
+                label-hint="Number"                                 
+                readonly>              
+            </oj-input-text>
+            
+            <oj-bind-if test="[[id]]">                  
+                <oj-input-text
+                    id="datetime"
+                    value="{{datetime}}"
+                    label-hint="Datetime"                                 
+                    readonly>              
+                </oj-input-text>
+            </oj-bind-if>             
           
             <oj-select-single 
                 id="neighbor" 
@@ -50,7 +66,7 @@ and open the template in the editor.
                 item-text="[[getItemText]]"                        
                 data="[[neighbors]]">
                 <template slot="itemTemplate" data-oj-as="item">
-                    <oj-list-item-layout>     
+                    <oj-list-item-layout >     
                         <span>
                             <oj-bind-text value="[[item.data.name]]"></oj-bind-text>                        
                         </span>
@@ -88,7 +104,7 @@ and open the template in the editor.
 <br/>
 
 <div slot="footer" style="text-align:right">
-    <oj-button id="deleteButton" chroming="danger" on-oj-action="[[]]" class="oj-button-danger-chrome">
+    <oj-button id="deleteButton" chroming="danger" on-oj-action="[[removePayment]]" class="oj-button-danger-chrome">
         Delete
     </oj-button>
     <oj-button id="saveButton" chroming="callToAction" on-oj-action="[[submitFee]]">
