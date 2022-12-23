@@ -21,7 +21,11 @@ define(['knockout',
 
     function DashboardViewModel() {        
         
-        var self = this;             
+        var self = this;      
+        
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));
+        
+        self.baseUrl = rootViewModel.incomeServiceBaseUrl();
         
         /* Tab Component */
         self.tabData = ko.observableArray([]);
@@ -47,6 +51,14 @@ define(['knockout',
         
         self.selectionRequired = ko.observable(false);
         
+        function getURL(operation, collection, options) {
+            var retObj = {};           
+            retObj['url'] = self.baseUrl + "years";
+            retObj['headers'] = {};  
+            retObj['headers']['Authorization'] = rootViewModel.token();
+            return retObj;
+        };
+        
         self.yearListDataSource = ko.computed(function () {
            /* List View Collection and Model */
             var categoryModelItem = oj.Model.extend({
@@ -54,7 +66,8 @@ define(['knockout',
             });
 
             var categoryListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.9:8080/IncomeService/api/years/",
+                customURL: getURL,
+                //url: self.baseUrl + "years",
                 model: categoryModelItem
             });                          
 

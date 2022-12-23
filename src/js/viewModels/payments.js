@@ -99,7 +99,7 @@ define(['knockout',
             });
 
             var paymentListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.9:8080/IncomeService/api/payments/fee/" + fee,
+                url: "http://192.168.0.5:8080/IncomeService/api/payments/fee/" + fee,
                 model: paymentModelItem
             });                        
 
@@ -121,7 +121,7 @@ define(['knockout',
             
             var feeId = args.params.fee;            
                         
-            $.getJSON("http://192.168.0.9:8080/IncomeService/api/fees/" + feeId)
+            $.getJSON("http://192.168.0.5:8080/IncomeService/api/fees/" + feeId)
                     .then(function (fee) {       
                 //alert("fee = " + JSON.stringify(fee));
                 self.feeModel(fee);                

@@ -44,7 +44,7 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
             var year = params.yearModel().get('year');                                                                 
  
             var collection = new Model.Collection(null, {
-              url: "http://192.168.0.9:8080/IncomeService/api/feesDTO/" + year
+              url: "http://192.168.0.5:8080/IncomeService/api/feesDTO/" + year
             });
             
             console.log(collection);

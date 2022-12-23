@@ -71,11 +71,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             
             //alert(JSON.stringify(params.houseModel()));
             
-            var url = "http://192.168.0.9:8080/IncomeService/api/houses/new";                                                 
+            var url = "http://192.168.0.5:8080/IncomeService/api/houses/new";                                                 
             
             try {
                 var houseId = params.houseModel().get('id');    
-                url = "http://192.168.0.9:8080/IncomeService/api/houses/" + houseId;                                                 
+                url = "http://192.168.0.5:8080/IncomeService/api/houses/" + houseId;                                                 
             }                        
             catch(err) {                
                 
@@ -126,7 +126,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 
                 $.ajax({                    
                     type: "POST",
-                    url: "http://192.168.0.9:8080/IncomeService/api/houses/save",                                        
+                    url: "http://192.168.0.5:8080/IncomeService/api/houses/save",                                        
                     dataType: "json",      
                     data: JSON.stringify(house),			  		 
                     //crossDomain: true,
@@ -152,7 +152,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 
             $.ajax({                    
                 type: "DELETE",
-                url: "http://192.168.0.9:8080/IncomeService/api/houses/delete/" + id,                                        
+                url: "http://192.168.0.5:8080/IncomeService/api/houses/delete/" + id,                                        
                 dataType: "json",      		  		 
                 //crossDomain: true,
                 contentType : "application/json",                    

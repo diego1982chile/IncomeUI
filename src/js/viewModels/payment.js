@@ -95,11 +95,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             self.amount(params.feeModel().amount); 
             self.neighbor(null);
             
-            var url = "http://192.168.0.9:8080/IncomeService/api/payments/new/" + params.feeModel().id;                                                                         
+            var url = "http://192.168.0.5:8080/IncomeService/api/payments/new/" + params.feeModel().id;                                                                         
             
             try {
                 var paymentId = params.paymentModel().get('id');    
-                url = "http://192.168.0.9:8080/IncomeService/api/payments/" + params.selectedPayment();                                                 
+                url = "http://192.168.0.5:8080/IncomeService/api/payments/" + params.selectedPayment();                                                 
             }                        
             catch(err) {                
                 
@@ -157,7 +157,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
 
                     $.ajax({                    
                         type: "POST",
-                        url: "http://192.168.0.9:8080/IncomeService/api/fees/save",                                        
+                        url: "http://192.168.0.5:8080/IncomeService/api/fees/save",                                        
                         dataType: "json",      
                         data: JSON.stringify(params.feeModel()),			  		 
                         //crossDomain: true,
@@ -192,7 +192,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             
             $.ajax({                    
                 type: "POST",
-                url: "http://192.168.0.9:8080/IncomeService/api/fees/save",                                        
+                url: "http://192.168.0.5:8080/IncomeService/api/fees/save",                                        
                 dataType: "json",      
                 data: JSON.stringify(params.feeModel()),			  		 
                 //crossDomain: true,

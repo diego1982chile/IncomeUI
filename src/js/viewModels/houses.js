@@ -96,7 +96,7 @@ define(['knockout',
             });
 
             var houseListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.9:8080/IncomeService/api/houses/",
+                url: "http://192.168.0.5:8080/IncomeService/api/houses/",
                 model: houseModelItem
             });                        
 
