@@ -100,14 +100,12 @@
               <!-- Responsive Toolbar -->
               <oj-toolbar>
                 <oj-menu-button id="userMenu" display="[[smScreen() ? 'icons' : 'all']]" chroming="borderless">
-                  <span><oj-bind-text value="[[userLogin]]"></oj-bind-text></span>
-                  <span slot="endIcon" :class="[[{'oj-icon demo-appheader-avatar': smScreen(), 'oj-component-icon oj-button-menu-dropdown-icon': !smScreen()}]]"></span>
-                  <oj-menu id="menu1" slot="menu">
-                    <oj-option id="pref" value="pref">Preferences</oj-option>
-                    <oj-option id="help" value="help">Help</oj-option>
-                    <oj-option id="about" value="about">About</oj-option>
-                    <oj-option id="out" value="out">Sign Out</oj-option>
-                  </oj-menu>
+                    <span><oj-bind-text value="[[userLogin]]"></oj-bind-text></span>
+                    <span slot="endIcon" :class="[[{'oj-icon demo-appheader-avatar': smScreen(), 'oj-component-icon oj-button-menu-dropdown-icon': !smScreen()}]]"></span>
+                    <oj-menu id="menu1" slot="menu" on-oj-action="[[menuItemAction]]">                    
+                      <oj-option id="out" value="out">
+                          <span data-bind="text: (userLoggedIn() =='Y'?'Sign Out':'')"></span>
+                      </oj-option>
                 </oj-menu-button>
               </oj-toolbar>
             </div>

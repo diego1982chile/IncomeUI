@@ -19,16 +19,13 @@ define(["knockout",
         "ojs/ojbutton", 
         "ojs/ojinputtext",         
         "ojs/ojlistitemlayout",
-        'ojs/ojknockout-validation',
-        'parameters'
+        'ojs/ojknockout-validation'        
     ],
  function(ko, AsyncRegExpValidator, ArrayDataProvider, parameters) {
 
     function LoginViewModel() {      
                   
-        this.connected = () => {                              
-            var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                          
-            rootViewModel.unauthorize();          
+        this.connected = () => {                                     
         };
         
         var self = this;
@@ -90,15 +87,12 @@ define(["knockout",
                             contentType : "application/json",                    
                             success: function(jwt) {                                                                                                                                            
                                 rootViewModel.userLogin(self.user());
-                                rootViewModel.userLoggedIn("Y"); 
-                                rootViewModel.token(jwt.token);                                
-                                rootViewModel.authorize();  
+                                rootViewModel.userLoggedIn("Y");                                                                   
+                                rootViewModel.authorize(jwt.token);  
                                 rootViewModel.router.go({path: 'dashboard'});
                             },
-                            error: function (request, status, error) {
-                                alert(error);
-                                console.log(request);
-                                alert(request.responseText);                          
+                            error: function (request, status, error) {                                
+                                console.log(request);                                                
                             },                                  
                         });                                                       
                     }

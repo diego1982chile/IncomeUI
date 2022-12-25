@@ -73,10 +73,7 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
         this.navDrawerOn = true;
         return OffcanvasUtils.toggle(this.drawerParams);
       }
-      
-      $(document).ready(function() {         
-         $('#ui-id-17').hide();
-      });
+     
 
       // Header            
       // Application Name used in Branding Area
@@ -90,37 +87,54 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
       
       this.tokenServiceBaseUrl = ko.observable("http://192.168.0.5:8181/TokenService/rest/");
 
-      this.token = ko.observable("placeholderForToken");      
 
-      this.authorize = () => {                
-        if(this.userLoggedIn() === "N") {
-            alert("Recurso no autorizado!");
-            this.router.go({path: 'login'});        
-        }      
-        else {                         
-            this.navDataProvider.reset(navData.slice(2), {idAttribute: 'id'});                                    
-            //this.router.go({path: 'accounts'});                            
-        }
-      }
+      this.authorize = (token) => {  
+                    
+        $.ajaxSetup({
+            beforeSend: function (xhr) {                
+                xhr.setRequestHeader("Authorization", "Bearer " + token);                
+            }
+        });
+        this.userLoggedIn("Y");
+        this.navDataProvider.reset(navData.slice(2), {idAttribute: 'id'});                                    
+
+      }    
       
-      this.unauthorize = () => {          
-        if(this.userLoggedIn() === "Y") {
-            this.router.go({path: 'accounts'});
-        }      
-        else {            
-        }
-      }
+    $(function() {        
+        $(document).ajaxError(function( event, request, settings ) {                
+            if(request.status === 401) {
+                var rootViewModel = ko.dataFor(document.getElementById('globalBody'));    
+                rootViewModel.navDataProvider.reset(navData.slice(0,1), {idAttribute: 'id'});
+                rootViewModel.router.go({path: 'login'});   
+                rootViewModel.userLogin("Not yet logged in");
+                rootViewModel.userLoggedIn("N");
+            }
+        });
+    });
+    
+    this.router.beforeStateChange.subscribe( (args) => {
+        var state = args.state;
+        var accept = args.accept;
+        // If we don't want to leave, block navigation
+        //if (currentViewmodel.isDirty) {
+        console.log(args);
+        
+        if(state && state.path == 'login') {            
+            this.navDataProvider.reset(navData.slice(0,1), {idAttribute: 'id'});            
+            this.userLogin("Not yet logged in");
+            this.userLoggedIn("N");                     
+        }                  
+    });  
       
-      this.menuItemAction = (event) => {        
+      this.menuItemAction = (event) => {             
         if (event.target.textContent.trim() === "Sign Out") {
-            this.userLoggedIn("N");
             this.userLogin("Not yet logged in");                                                            
             
             this.navDataProvider.reset(navData.slice(0,1), {idAttribute: 'id'});                                             
             this.router.go({path: 'login'});   
             
         }
-       }
+       }            
 
       // Footer
       this.footerLinks = [
@@ -133,7 +147,10 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
      }
      // release the application bootstrap busy state
      Context.getPageContext().getBusyContext().applicationBootstrapComplete();
+    
 
      return new ControllerViewModel();
   }
+                    
+          
 );

@@ -51,14 +51,6 @@ define(['knockout',
         
         self.selectionRequired = ko.observable(false);
         
-        function getURL(operation, collection, options) {
-            var retObj = {};           
-            retObj['url'] = self.baseUrl + "years";
-            retObj['headers'] = {};  
-            retObj['headers']['Authorization'] = rootViewModel.token();
-            return retObj;
-        };
-        
         self.yearListDataSource = ko.computed(function () {
            /* List View Collection and Model */
             var categoryModelItem = oj.Model.extend({
@@ -66,10 +58,10 @@ define(['knockout',
             });
 
             var categoryListCollection = new oj.Collection(null, {
-                customURL: getURL,
-                //url: self.baseUrl + "years",
+                //customURL: getURL,
+                url: self.baseUrl + "years",
                 model: categoryModelItem
-            });                          
+            });            
 
             self.yearList = ko.observable(categoryListCollection);  
 

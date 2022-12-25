@@ -19,20 +19,32 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
     // Create a child router with one default path
     this.childRouter = rootViewModel.router.createChildRouter([
         { path: 'payments' },
-    ]);
+    ]);   
     
     /**
      * The view model for the main content view template
      */        
     function feesViewModel(params) {
         
-        var self = this;           
+        var self = this;    
+        
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));
+        
+        self.baseUrl = rootViewModel.incomeServiceBaseUrl();
         
         rootViewModel.router.sync();
         
         self.pivoted = ko.observable(false);
         
-        self.KnockoutTemplateUtils = KnockoutTemplateUtils;                
+        self.KnockoutTemplateUtils = KnockoutTemplateUtils;   
+        
+        function getURL(year) {
+            var retObj = {};           
+            retObj['url'] = self.baseUrl + "feesDTO/" + year;
+            retObj['headers'] = {};  
+            retObj['headers']['Authorization'] = rootViewModel.token();
+            return retObj;
+        };
                                              
         self.dataSource = ko.computed(function () {
             
@@ -41,17 +53,22 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
                 return;
             }                                                                                                           
             
-            var year = params.yearModel().get('year');                                                                 
- 
+            var year = params.yearModel().get('year');  
+            
+            /* List View Collection and Model */
+            var categoryModelItem = oj.Model.extend({
+                idAttribute: 'id'
+            });                   
+            
             var collection = new Model.Collection(null, {
-              url: "http://192.168.0.5:8080/IncomeService/api/feesDTO/" + year
+              url: self.baseUrl + "feesDTO/" + year
             });
             
             console.log(collection);
 
             return new collectionModule.CollectionDataGridDataSource(collection,
-                    { rowHeader: 'house' }
-                );
+                { rowHeader: 'house' }
+            );
         });
         
         self.columnHeaderRenderer = function (headerContext) {
