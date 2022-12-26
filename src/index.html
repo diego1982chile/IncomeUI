@@ -93,7 +93,8 @@
               </oj-button>
             </div>
             <div class="oj-flex-bar-middle oj-sm-align-items-baseline">
-              <span role="img" class="oj-icon demo-oracle-icon" title="Oracle Logo" alt="Oracle Logo"></span>
+              <img src="css/images/altos-raco.png" alt="bulleted list image" height="25" style="padding-right:.5em"/>
+              <!--span role="img" class="oj-icon demo-oracle-icon" title="Oracle Logo" alt="Oracle Logo"></span-->
               <h1 class="oj-sm-only-hide oj-web-applayout-header-title" title="Application Name"><oj-bind-text value="[[appName]]"></oj-bind-text></h1>
             </div>
             <div class="oj-flex-bar-end">
@@ -120,6 +121,9 @@
           </div>
         </header>
         <oj-module role="main" class="oj-web-applayout-max-width oj-web-applayout-content" config="[[moduleAdapter.koObservableConfig]]">
+            <!-- Messages -->
+            <oj-messages messages="[[messagesDataprovider]]" position="{}" display="notification">
+            </oj-messages>
         </oj-module>
         <footer class="oj-web-applayout-footer" role="contentinfo">
           <div class="oj-web-applayout-footer-item oj-web-applayout-max-width">
@@ -140,7 +144,7 @@
           </div>
         </footer>
       </div>
-    </div>
+    </div>    
 
     <!-- This injects script tags for the main javascript files -->
 		<!-- injector:scripts -->

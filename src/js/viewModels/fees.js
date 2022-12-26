@@ -26,13 +26,13 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
      */        
     function feesViewModel(params) {
         
-        var self = this;    
+        var self = this;                   
         
-        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                
         
-        self.baseUrl = rootViewModel.incomeServiceBaseUrl();
+        self.isAdmin = ko.observable(rootViewModel.isAdmin());
         
-        rootViewModel.router.sync();
+        self.baseUrl = rootViewModel.incomeServiceBaseUrl();                
         
         self.pivoted = ko.observable(false);
         

@@ -23,7 +23,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
      */        
     function houseContentViewModel(params) {
         
-        var self = this;                        
+        var self = this;        
+        
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                
+        
+        self.isAdmin = ko.observable(rootViewModel.isAdmin());
         
         /* Variables */
         self.id = ko.observable(null);
@@ -281,7 +285,12 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         };
 
                                             
-    }        
+    }
+    
+    this.goToFees = (event, data) => {                            
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
+        rootViewModel.router.go({path: 'dashboard'});        
+    };
        
     return houseContentViewModel;
 });

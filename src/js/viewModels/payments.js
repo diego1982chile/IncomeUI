@@ -22,7 +22,11 @@ define(['knockout',
      
     function paymentsViewModel(args) {
         
-        var self = this;             
+        var self = this;            
+        
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                
+        
+        self.isAdmin = ko.observable(rootViewModel.isAdmin());
         
         self.feeModel = ko.observable();
         

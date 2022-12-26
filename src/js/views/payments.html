@@ -20,13 +20,15 @@
                 <!--oj-paging-control id="paging" data="[[backTestListDataSource]]" page-size="4">
                 </oj-paging-control-->
                 <div slot="header" style="text-align:right">
-                    <oj-button 
-                        id="newButton"
-                        chroming="solid"
-                        on-oj-action="[[newPayment]]" 
-                        data-oj-clickthrough="disabled">
-                        New
-                    </oj-button>
+                    <oj-bind-if test="[[isAdmin]]"> 
+                        <oj-button 
+                            id="newButton"
+                            chroming="solid"
+                            on-oj-action="[[newPayment]]" 
+                            data-oj-clickthrough="disabled">
+                            New
+                        </oj-button>
+                    </oj-bind-if>
                 </div>
                 <oj-paging-control slot="header"
                     id="paging" data="[[paymentListDataSource]]" 

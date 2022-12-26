@@ -62,7 +62,8 @@ and open the template in the editor.
                 id="neighbor" 
                 label-hint="Neighbor"                    
                 value="{{neighbor}}"                        
-                required
+                required    
+                disabled="[[isAdmin?'false':'true']]"
                 item-text="[[getItemText]]"                        
                 data="[[neighbors]]">
                 <template slot="itemTemplate" data-oj-as="item">
@@ -80,18 +81,20 @@ and open the template in the editor.
                 label-hint="Amount"
                 required="required" 
                 min="0"
+                readonly="[[isAdmin?'':'readonly']]"
                 disabled='{{disableControls}}'
                 max="9999999"
                 step="0">              
             </oj-input-number> 
             
-            <oj-checkboxset
-                id="totalAmount"                
-                label-hint=" "              
-                value="{{totalAmount}}">
-                <oj-option value="total">Total amount</oj-option>
-            </oj-checkboxset>
-         
+            <oj-bind-if test="[[$parent.isAdmin]]"> 
+                <oj-checkboxset
+                    id="totalAmount"                
+                    label-hint=" "              
+                    value="{{totalAmount}}">
+                    <oj-option value="total">Total amount</oj-option>
+                </oj-checkboxset>
+            </oj-bind-if>
 
         </oj-form-layout> 
         
@@ -104,12 +107,20 @@ and open the template in the editor.
 <br/>
 
 <div slot="footer" style="text-align:right">
-    <oj-button id="deleteButton" chroming="danger" on-oj-action="[[removePayment]]" class="oj-button-danger-chrome">
-        Delete
+    
+    <oj-button id="backButton" on-oj-action="[[goToFees]]" class="">
+        Back
     </oj-button>
-    <oj-button id="saveButton" chroming="callToAction" on-oj-action="[[submitFee]]">
-        Save
-    </oj-button>
+    
+    <oj-bind-if test="[[isAdmin]]"> 
+        <oj-button id="deleteButton" chroming="danger" on-oj-action="[[removePayment]]" class="oj-button-danger-chrome">
+            Delete
+        </oj-button>
+        <oj-button id="saveButton" chroming="callToAction" on-oj-action="[[submitFee]]">
+            Save
+        </oj-button>
+    </oj-bind-if>
+    
 </div>
 
  <!-- Messages -->

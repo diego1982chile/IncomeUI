@@ -86,10 +86,8 @@ define(["knockout",
                             //crossDomain: true,
                             contentType : "application/json",                    
                             success: function(jwt) {                                                                                                                                            
-                                rootViewModel.userLogin(self.user());
-                                rootViewModel.userLoggedIn("Y");                                                                   
-                                rootViewModel.authorize(jwt.token);  
-                                rootViewModel.router.go({path: 'dashboard'});
+                                rootViewModel.userLogin(self.user());                                                                                                   
+                                rootViewModel.authorize(jwt.token);                                  
                             },
                             error: function (request, status, error) {                                
                                 console.log(request);                                                

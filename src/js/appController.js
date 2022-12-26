@@ -9,7 +9,7 @@
  * Your application specific code will go here
  */
 define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils', 'ojs/ojcorerouter', 'ojs/ojmodulerouter-adapter', 'ojs/ojknockoutrouteradapter', 'ojs/ojurlparamadapter', 'ojs/ojresponsiveutils', 'ojs/ojresponsiveknockoututils', 'ojs/ojarraydataprovider',
-        'ojs/ojoffcanvas', 'ojs/ojmodule-element', 'ojs/ojknockout', 'ojs/ojarraytabledatasource'],
+        'ojs/ojoffcanvas', 'ojs/ojmodule-element', 'ojs/ojknockout', 'ojs/ojarraytabledatasource','ojs/ojmessages'],
   function(ko, Context, moduleUtils, KnockoutTemplateUtils, CoreRouter, ModuleRouterAdapter, KnockoutRouterAdapter, UrlParamAdapter, ResponsiveUtils, ResponsiveKnockoutUtils, ArrayDataProvider, OffcanvasUtils) {
 
      function ControllerViewModel() {
@@ -36,10 +36,9 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
       let navData = [
         { path: '', id: 'login', detail: { label: 'Login', iconClass: 'oj-ux-ico-information-s' }, redirect: 'login' },
         { path: 'login', id: 'login', detail: { label: 'Login', iconClass: 'oj-ux-ico-information-s' } }, 
-        { path: 'dashboard', id: 'dashboard', detail: { label: 'Dashboard', iconClass: 'oj-ux-ico-bar-chart' } },
+        { path: 'dashboard', id: 'dashboard', detail: { label: 'Fees', iconClass: 'oj-ux-ico-bar-chart' } },
         { path: 'houses', id: 'houses', detail: { label: 'Houses', iconClass: 'oj-ux-ico-fire' } },                     
-        { path: 'payments', id: 'payments', detail: { label: 'Payments', iconClass: 'oj-ux-ico-fire' } },          
-        { path: 'about', id: 'about', detail: { label: 'About', iconClass: 'oj-ux-ico-information-s' } }
+        { path: 'payments', id: 'payments', detail: { label: 'Payments', iconClass: 'oj-ux-ico-fire' } }        
       ];
 
       // Router setup
@@ -75,20 +74,32 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
       }
      
 
-      // Header            
-      // Application Name used in Branding Area
-      this.appName = ko.observable("App Name");
-      // User Info used in Global Navigation area
-      this.userLogin = ko.observable("Not yet logged in");
+    // Header            
+    // Application Name used in Branding Area
+    this.appName = ko.observable("Incomes");
+    // User Info used in Global Navigation area
+    this.userLogin = ko.observable("Not yet logged in");
+
+    this.userLoggedIn = ko.observable("N");
+    
+    this.isAdmin = ko.observable(false);
+
+    this.incomeServiceBaseUrl = ko.observable("http://192.168.0.5:8080/IncomeService/api/");
+
+    this.tokenServiceBaseUrl = ko.observable("http://192.168.0.5:8181/TokenService/rest/");
       
-      this.userLoggedIn = ko.observable("N");
-      
-      this.incomeServiceBaseUrl = ko.observable("http://192.168.0.5:8080/IncomeService/api/");
-      
-      this.tokenServiceBaseUrl = ko.observable("http://192.168.0.5:8181/TokenService/rest/");
+    this.messages = ko.observableArray();
+  
+    this.messagesDataprovider = new ArrayDataProvider(this.messages);
 
 
-      this.authorize = (token) => {  
+      this.authorize = (token) => { 
+          
+        let jwtData = token.split('.')[1]
+        let decodedJwtJsonData = window.atob(jwtData)
+        let decodedJwtData = JSON.parse(decodedJwtJsonData)
+
+        this.isAdmin(decodedJwtData.groups.includes("ADMIN"));
                     
         $.ajaxSetup({
             beforeSend: function (xhr) {                
@@ -96,19 +107,44 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
             }
         });
         this.userLoggedIn("Y");
-        this.navDataProvider.reset(navData.slice(2), {idAttribute: 'id'});                                    
+        
+        if(this.isAdmin()) {
+            this.navDataProvider.reset(navData.slice(2), {idAttribute: 'id'});                                    
+        }        
+        else {
+            this.navDataProvider.reset(navData.slice(2, 3), {idAttribute: 'id'});                                    
+        }
+        
+        this.router.go({path: 'dashboard'});
 
       }    
       
     $(function() {        
         $(document).ajaxError(function( event, request, settings ) {                
-            if(request.status === 401) {
-                var rootViewModel = ko.dataFor(document.getElementById('globalBody'));    
+            
+            var rootViewModel = ko.dataFor(document.getElementById('globalBody'));  
+            var msg;
+            
+            if(request.status === 401) {                  
                 rootViewModel.navDataProvider.reset(navData.slice(0,1), {idAttribute: 'id'});
                 rootViewModel.router.go({path: 'login'});   
                 rootViewModel.userLogin("Not yet logged in");
                 rootViewModel.userLoggedIn("N");
+                msg = request.statusText;
             }
+            if (!request.status) {
+                //ERR_CONNECTION_REFUSED hits this one                
+                rootViewModel.router.go({path: 'login'});   
+                rootViewModel.userLogin("Not yet logged in");
+                rootViewModel.userLoggedIn("N");                      
+                msg = 'No connection. Verify Network.';
+            } else if (request.status == 404) {
+                msg = 'Requested page not found. [404]';
+            } else if (request.status == 500) {
+                msg = 'Internal Server Error [500].';
+            }
+            
+            rootViewModel.messages([{severity: 'error', summary: 'General Error', detail: msg, autoTimeout: 5000}]);                     
         });
     });
     
@@ -134,7 +170,8 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
             this.router.go({path: 'login'});   
             
         }
-       }            
+       }
+      
 
       // Footer
       this.footerLinks = [
