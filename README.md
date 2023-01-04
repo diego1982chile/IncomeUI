@@ -3,7 +3,7 @@
 ## Overview
 Rest API for managing monthly fees for a neighborhood. 
 
-Microprofile project featuring Jersey Rest API for exposing resources and EJB for backend scheduled tasks. Resources are secured via MP-JWT authorization mechanism. Identity provider is covered as a separated project.
+Microprofile project featuring Jersey Rest API for exposing resources and EJB for backend scheduled tasks. Resources are secured via MP-JWT authorization mechanism. Token generator is covered as a separated project.
 
 ## Setup
 
