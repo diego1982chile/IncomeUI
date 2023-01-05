@@ -1,24 +1,31 @@
 # IncomeUI
 
 ## Overview
-Rest API for managing monthly fees for a neighborhood. 
+Simple yet highly modularized SPA as a frontend for IncomeService Rest API
 
-Microprofile project featuring Jersey Rest API for exposing resources and EJB for backend scheduled tasks. Resources are secured via MP-JWT authorization mechanism. Token generator is covered as a separated project.
+OracleJet project featuring simple crud over houses and payments. Two types of users with coarse and fine grained access control over resources.
 
 ## Setup
 
 ### Required Platforms
-- Java JDK 8+
-- Maven 3+
-- Payara Micro 5.194+
+- Node.js 5+ and npm
 
 ### Instructions
+- To install Ojet CLI execute following command:
+     ```
+     npm -g install @oracle/ojet-cli
+     ```
 - Clone project from repository
 - Sync project dependencies. Go to project root:
      ```
-     mvn clean install
+     ojet restore
      ```
 - Run project
      ```
-     java -jar payara-micro.jar --deploy /path/to/project/target/IncomeService.war
+     ojet serve
      ```
+- For building the project this command produces a WAR file
+     ```
+     ojet build --release
+     ```
+
