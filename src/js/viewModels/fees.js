@@ -72,6 +72,7 @@ function (ko, Model, KnockoutTemplateUtils, collectionModule) {
         });
         
         self.columnHeaderRenderer = function (headerContext) {
+            alert("hola");
             console.log(JSON.stringify(headerContext.keys()));
             var column;
             $(headerContext.keys).each(function(k, v) {

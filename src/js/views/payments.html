@@ -13,23 +13,13 @@
 </STYLE>
 <div id="form-container" class="oj-web-applayout-max-width oj-web-applayout-content">
   <div class="oj-flex">
+      
     <div class="oj-xl-2 oj-lg-2 oj-md-3 oj-sm-12 oj-flex-item oj-flex">
       <div id="navigationContent" role="navigation" class="oj-panel oj-margin oj-flex-item">
             <!-- Ticket List -->
             <div id='listviewWrapper' class="list-view-container">
                 <!--oj-paging-control id="paging" data="[[backTestListDataSource]]" page-size="4">
                 </oj-paging-control-->
-                <div slot="header" style="text-align:right">
-                    <oj-bind-if test="[[isAdmin]]"> 
-                        <oj-button 
-                            id="newButton"
-                            chroming="solid"
-                            on-oj-action="[[newPayment]]" 
-                            data-oj-clickthrough="disabled">
-                            New
-                        </oj-button>
-                    </oj-bind-if>
-                </div>
                 <oj-paging-control slot="header"
                     id="paging" data="[[paymentListDataSource]]" 
                     page-options='[[pagingLayout]]' page-size="6">
@@ -47,7 +37,12 @@
                 <script type="text/html" id="ticket-list-template">
                     <li data-bind="attr: {id: $data['id']}">                      
                       <div class="oj-flex oj-sm-padding-2x-top oj-sm-padding-2x-bottom">
-                        <oj-bind-text value="[['Payment '+$data['number']]]"></oj-bind-text>                        
+                        <oj-bind-if test="[[$data['number'] == 0]]">
+                            <oj-bind-text value="[['Payment New']]"></oj-bind-text>      
+                        </oj-bind-if>
+                        <oj-bind-if test="[[$data['number'] != 0]]">
+                            <oj-bind-text value="[['Payment '+$data['number']]]"></oj-bind-text>      
+                        </oj-bind-if>
                       </div>
                     </li>
                 </script>
@@ -55,6 +50,7 @@
                                   
       </div>
     </div>
+
     <div class="oj-xl-10 oj-lg-10  oj-md-9 oj-sm-12 oj-flex-item oj-flex">
       <div id="mainContent" role="main" class="oj-panel oj-margin oj-flex-item">
           

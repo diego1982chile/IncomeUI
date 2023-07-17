@@ -22,7 +22,13 @@ define(['knockout',
      
     function housesViewModel() {
         
-       var self = this;             
+        var self = this;
+       
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                
+        
+        self.isAdmin = ko.observable(rootViewModel.isAdmin());
+        
+        self.baseUrl = rootViewModel.incomeServiceBaseUrl(); 
         
         self.selectedTabItem = ko.observable();
         
@@ -96,14 +102,14 @@ define(['knockout',
             });
 
             var houseListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.5:8080/IncomeService/api/houses/",
+                url: self.baseUrl + "houses/",
                 model: houseModelItem
             });                        
 
             self.houseList = ko.observable(houseListCollection);  
             
             self.sleep(500).then(() => {
-                if(self.houseList().length == 0) {  
+                if(self.houseList().length === 0) {  
                     $("#newButton").trigger("click");
                 }
             });            

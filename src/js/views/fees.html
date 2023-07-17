@@ -46,9 +46,11 @@
               selection-mode.cell="single"
               data="[[dataSource]]"              
               banding-interval.row="1"              
-              header.column.renderer="[[KnockoutTemplateUtils.getRenderer('header_template')]]"
-              header.column.style="width:83px;justify-content: center;"              
-              header.row.style="width:83px; height:45px"                                          
+              header.column.renderer="[[KnockoutTemplateUtils.getRenderer('header_template')]]"              
+              header.column.style="width:71px; justify-content:center !important;"
+              header.column.sortable="disable"               
+              header.row.style="height:45px; width:85px; justify-content:center !important;"
+              header.column.class-name="demo-data-grid-header-row"
               cell.renderer="[[KnockoutTemplateUtils.getRenderer('cell_template')]]"
               cell.class-name="[[getCellClassName]]">                  
             </oj-data-grid>
@@ -59,7 +61,12 @@
                 </oj-bind-if>              
             </script>
           
-            <script type="text/html" id="cell_template">                   
+            <script type="text/html" id="cell_template"> 
+                <oj-bind-if test="[[$data <= 0]]">                  
+                  <span>                                          
+                    <oj-bind-text value="[[$data]]" style="color:red"></oj-bind-text>                    
+                  </span>
+                </oj-bind-if>
                 <oj-bind-if test="[[$data.payment == 0]]">                  
                   <span>                      
                     <oj-bind-if test="[[$parent.isAdmin]]">  

@@ -9,7 +9,7 @@
  * Your application specific code will go here
  */
 define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils', 'ojs/ojcorerouter', 'ojs/ojmodulerouter-adapter', 'ojs/ojknockoutrouteradapter', 'ojs/ojurlparamadapter', 'ojs/ojresponsiveutils', 'ojs/ojresponsiveknockoututils', 'ojs/ojarraydataprovider',
-        'ojs/ojoffcanvas', 'ojs/ojmodule-element', 'ojs/ojknockout', 'ojs/ojarraytabledatasource','ojs/ojmessages'],
+        'ojs/ojoffcanvas', 'ojs/ojmodule-element', 'ojs/ojknockout', 'ojs/ojarraytabledatasource', 'ojs/ojmessages', 'ojs/ojdialog', "ojs/ojformlayout", "ojs/ojbutton", "ojs/ojlabelvalue", "ojs/ojlabel", 'ojs/ojprogress'],
   function(ko, Context, moduleUtils, KnockoutTemplateUtils, CoreRouter, ModuleRouterAdapter, KnockoutRouterAdapter, UrlParamAdapter, ResponsiveUtils, ResponsiveKnockoutUtils, ArrayDataProvider, OffcanvasUtils) {
 
      function ControllerViewModel() {
@@ -84,9 +84,9 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
     
     this.isAdmin = ko.observable(false);
 
-    this.incomeServiceBaseUrl = ko.observable("http://192.168.0.5:8080/IncomeService/api/");
+    this.incomeServiceBaseUrl = ko.observable("http://192.168.0.9:8080/IncomeService/api/");
 
-    this.tokenServiceBaseUrl = ko.observable("http://192.168.0.5:8181/TokenService/rest/");
+    this.tokenServiceBaseUrl = ko.observable("http://192.168.0.9:8181/TokenService/api/");
       
     this.messages = ko.observableArray();
   
@@ -138,13 +138,16 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
                 rootViewModel.userLogin("Not yet logged in");
                 rootViewModel.userLoggedIn("N");                      
                 msg = 'No connection. Verify Network.';
-            } else if (request.status == 404) {
+            } else if (request.status === 404) {
                 msg = 'Requested page not found. [404]';
-            } else if (request.status == 500) {
+            } else if (request.status === 500) {
                 msg = 'Internal Server Error [500].';
             }
             
-            rootViewModel.messages([{severity: 'error', summary: 'General Error', detail: msg, autoTimeout: 5000}]);                     
+            if (msg) {
+                rootViewModel.messages([{severity: 'error', summary: 'General Error', detail: msg, autoTimeout: 5000}]);                     
+            }
+                        
         });
     });
     
@@ -160,17 +163,57 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
             this.userLogin("Not yet logged in");
             this.userLoggedIn("N");                     
         }                  
-    });  
+    });       
       
-      this.menuItemAction = (event) => {             
-        if (event.target.textContent.trim() === "Sign Out") {
-            this.userLogin("Not yet logged in");                                                            
+    this.menuItemAction = (event) => {             
+          if (event.target.textContent.trim() === "Sign Out") {
+              this.userLogin("Not yet logged in");                                                            
+              this.isAdmin = ko.observable(false);
+              this.navDataProvider.reset(navData.slice(0,1), {idAttribute: 'id'});                                             
+              this.router.go({path: 'login'});   
+          }
+          if (event.target.textContent.trim() === "Preferences") {
+              this.openDialog();
+          }
+     }
+       
+    this.openDialog = function(event, data) {    
+        alert("hola");
+        document.getElementById("dialogPreferences").open();                 
+    }
+    
+    this.closeDialog = function(event, data) {                        
+        document.getElementById("dialogPreferences").close();                 
+    } 
+    
+    this.reset = () => {    
+        
+        var r = confirm("¿Are you sure you want to confirm this action?");
             
-            this.navDataProvider.reset(navData.slice(0,1), {idAttribute: 'id'});                                             
-            this.router.go({path: 'login'});   
-            
-        }
-       }
+        if (r == false) {
+            return false;
+        } 
+                 
+        $.ajax({                    
+          type: "GET",
+          url: this.incomeServiceBaseUrl() + "database/load/",                                        
+          dataType: "json",                    
+          //crossDomain: true,
+          contentType : "application/json",                    
+          success: function() {                                    
+                var msg = "The BD was succedfuly resetted";
+                var rootViewModel = ko.dataFor(document.getElementById('globalBody'));  
+                rootViewModel.messages([{severity: 'info', summary: 'Succesful DB Reset', detail: msg, autoTimeout: 5000}]);
+                rootViewModel.closeDialog();
+                rootViewModel.router.go({path: 'login'}); 
+          },
+          error: function (request, status, error) {
+                alert(request.responseText);                          
+                var rootViewModel = ko.dataFor(document.getElementById('globalBody'));  
+                rootViewModel.messages([{severity: 'error', summary: 'Error Resetting DB', detail: error, autoTimeout: 5000}]);
+          }                                 
+        });                                                                           
+    };
       
 
       // Footer

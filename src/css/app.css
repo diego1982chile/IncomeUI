@@ -51,3 +51,7 @@ html[dir="rtl"] .demo-oracle-icon {
       transform:translate(-25%, -25%) scale(0.5)
   }
 }
+
+div.oj-datagrid-column-header-cell {
+    justify-content: center !important;    
+}

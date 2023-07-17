@@ -22,7 +22,13 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
      */        
     function houseContentViewModel(params) {
         
-        var self = this;                        
+        var self = this;
+        
+        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                
+        
+        self.isAdmin = ko.observable(rootViewModel.isAdmin());
+        
+        self.baseUrl = rootViewModel.incomeServiceBaseUrl(); 
         
         /* Variables */
         self.id = ko.observable(null);
@@ -71,11 +77,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             
             //alert(JSON.stringify(params.houseModel()));
             
-            var url = "http://192.168.0.5:8080/IncomeService/api/houses/new";                                                 
+            var url = self.baseUrl + "houses/new";                                                 
             
             try {
                 var houseId = params.houseModel().get('id');    
-                url = "http://192.168.0.5:8080/IncomeService/api/houses/" + houseId;                                                 
+                url = self.baseUrl + "houses/" + houseId;                                                 
             }                        
             catch(err) {                
                 
@@ -126,7 +132,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 
                 $.ajax({                    
                     type: "POST",
-                    url: "http://192.168.0.5:8080/IncomeService/api/houses/save",                                        
+                    url: self.baseUrl + "houses/save",                                        
                     dataType: "json",      
                     data: JSON.stringify(house),			  		 
                     //crossDomain: true,
@@ -152,7 +158,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 
             $.ajax({                    
                 type: "DELETE",
-                url: "http://192.168.0.5:8080/IncomeService/api/houses/delete/" + id,                                        
+                url: self.baseUrl + "houses/delete/" + id,                                        
                 dataType: "json",      		  		 
                 //crossDomain: true,
                 contentType : "application/json",                    

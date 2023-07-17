@@ -24,10 +24,12 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
     function houseContentViewModel(params) {
         
         var self = this;        
-        
+               
         var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                
         
         self.isAdmin = ko.observable(rootViewModel.isAdmin());
+        
+        self.baseUrl = rootViewModel.incomeServiceBaseUrl(); 
         
         /* Variables */
         self.id = ko.observable(null);
@@ -46,15 +48,21 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         
         self.amount = ko.observable();
         
-        self.totalAmount = ko.observableArray(["total"]);
+        self.totalAmount = ko.observable();
         
         self.disabled = ko.observable(true);
                                                     
-        self.feeModel = ko.observable();                            
+        self.feeModel = ko.observable();  
+        
+        self.selectedFees = ko.observableArray([]);
+        self.selectedFeeModel = ko.observable();
+        self.feeList = ko.observable();        
+        
+        self.fees_arr = ko.observableArray([]);
         
         self.messages = ko.observableArray();
   
-        self.messagesDataprovider = new ArrayDataProvider(self.messages);
+        self.messagesDataprovider = new ArrayDataProvider(self.messages);                
         
         self.removeMsgs = function (event) {            
             self.messages([]);                        
@@ -69,16 +77,16 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         
         self.removeFromPaymentList = (id) => {                         
             params.paymentList().remove(id);
-            params.selectedPayhment([]);
+            params.selectedPayment([]);
             self.sleep(500).then(() => {   
-                if(params.paymentList().length == 0) { 
+                if(params.paymentList().length === 0) { 
                     $("#newButton").trigger("click");  
                 }
             }); 
         };
        
                         
-        ko.computed(function () {                        
+        ko.computed(function () {                            
             
             if(params.feeModel() === undefined) {                
                 return;
@@ -96,26 +104,23 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 params.feeModel().house.neighbors,
                 {idAttribute: 'id'}));                            
                 
-            self.amount(params.feeModel().amount); 
+            self.amount(0); 
             self.neighbor(null);
             
-            var url = "http://192.168.0.5:8080/IncomeService/api/payments/new/" + params.feeModel().id;                                                                         
-            
-            try {
-                var paymentId = params.paymentModel().get('id');    
-                url = "http://192.168.0.5:8080/IncomeService/api/payments/" + params.selectedPayment();                                                 
-            }                        
-            catch(err) {                
-                
-            }
-            
-            $.getJSON(url).then(function (payment) {                                       
+            var url = self.baseUrl + "payments/new/" + params.feeModel().id;                             
+                            
+            if (params.feeModel().payment) {
+                url = self.baseUrl + "payments/" + params.feeModel().payment.id;                                                 
+            }                                    
+                        
+            $.getJSON(url).then(function (payment) {                 
                 //alert(payment.number);
                 console.log(JSON.stringify(payment));                                      
                 //self.paymentModel(payment);                                  
                 self.id(payment.id);                                           
                 self.number(payment.number);                
-                self.datetime(payment.datetime);  
+                self.datetime(payment.datetime); 
+                self.amount(payment.amount);
                 
                 if(payment.neighbor) {
                     self.neighbor(payment.neighbor.id);                                
@@ -128,7 +133,28 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                     $("#deleteButton").hide();
                 }                
               
-            });
+            });                        
+            
+            var url2 = self.baseUrl + "fees/unpaid/" + params.feeModel().id;    
+            
+            if (params.feeModel().payment) {
+                url2 = self.baseUrl + "fees/payment/" + params.feeModel().payment.id;                                                 
+            }                        
+            
+            $.getJSON(url2).then(function (fees) {                 
+                //Walert(payment.number);                                                   
+                //self.paymentModel(payment);                   
+                
+                fees.forEach((fee) => {                    
+                    var fee_obj = {};
+                    fee_obj.value = fee.id;
+                    fee_obj.label = fee.year.year + "/" + fee.month.name;
+                    fee_obj.amount = fee.amount;
+                    self.fees_arr().push(fee_obj);
+                });                                
+                
+                self.feeList(new ArrayDataProvider(self.fees_arr(), { keyAttributes: "value" }));
+            });                                                                                                   
                              
         });   
        
@@ -149,28 +175,35 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                         $("#amount").prop( "disabled", true );
                         return false;
                     }                                        
-
-                    var payment = {};                                
-
-                    payment.id = self.id();
-                    payment.neighbor = self.getNeighborById(self.neighbor());
-                    payment.amount = self.amount(); 
-                    payment.number = self.number();
-
-                    params.feeModel().payments.push(payment);                   
-
+                    
+                    var payment = self.getPaymentByNumber(params.feeModel(), self.number());
+                                     
+                    if (!payment) {
+                        payment = {};                                          
+                        payment.id = self.id();
+                        payment.neighbor = self.getNeighborById(self.neighbor());
+                        payment.amount = self.totalAmount(); 
+                        payment.number = self.number();                        
+                    }     
+                    else {
+                        payment.neighbor = self.getNeighborById(self.neighbor());
+                        payment.amount = self.totalAmount(); 
+                        payment.id = self.id();
+                    }
+                                                              
                     $.ajax({                    
                         type: "POST",
-                        url: "http://192.168.0.5:8080/IncomeService/api/fees/save",                                        
+                        url: self.baseUrl + "payments/save?fees=" + self.selectedFees(),                                        
                         dataType: "json",      
-                        data: JSON.stringify(params.feeModel()),			  		 
+                        data: JSON.stringify(payment),			  		 
                         //crossDomain: true,
                         contentType : "application/json",                    
                         success: function(fee) {                                            
                             self.messages([{severity: 'confirmation', summary: 'Succesful Action', detail: "payment saved successfuly", autoTimeout: 5000}]);                                                    
                             //params.paymentList(fee.payments);                            
                             //params.selectedPayment([self.getPaymentByNumber(fee, self.number()).id]); 
-                            self.refreshPaymentList(self.getPaymentByNumber(fee, self.number()));
+                            //self.feeModel(fee);
+                            self.refreshPaymentList(self.getPaymentByNumber(fee, self.number()));                            
                         },
                         error: function (request, status, error) {
                             //alert(JSON.stringify(request));                          
@@ -190,13 +223,10 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             var id = self.id();
             
             self.deletePayment(id);
-            
-            alert(JSON.stringify(params.feeModel().payments));
-                        
-            
+ 
             $.ajax({                    
                 type: "POST",
-                url: "http://192.168.0.5:8080/IncomeService/api/fees/save",                                        
+                url: self.baseUrl + "fees/save",                                        
                 dataType: "json",      
                 data: JSON.stringify(params.feeModel()),			  		 
                 //crossDomain: true,
@@ -229,10 +259,36 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         self.getItemText = function (itemContext) {
             return itemContext.data.name;
         };
-
-        self.disableControls = ko.computed(() => {
-            return self.totalAmount()[0];
-        })
+                
+        self.totalAmount = ko.computed(() => {                                    
+            
+            var totalAmount = 0; 
+                 
+            $(self.selectedFees()).each(function(key, value) {                
+                
+                var payment = self.getPaymentById(value);
+         
+                totalAmount = totalAmount + payment.amount;
+                
+            });                                                
+                        
+            return totalAmount;                        
+        });    
+        
+        self.getPaymentById = (id) => {
+            
+            var toReturn; 
+                 
+            $(self.fees_arr()).each(function(key,value) {   
+                
+                if(value.value === id) {                    
+                    toReturn = value;
+                    return false;
+                }                
+            });                        
+            
+            return toReturn;
+        }
         
         self.getNeighborById = (id) => {                      
             

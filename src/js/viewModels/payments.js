@@ -28,6 +28,8 @@ define(['knockout',
         
         self.isAdmin = ko.observable(rootViewModel.isAdmin());
         
+        self.baseUrl = rootViewModel.incomeServiceBaseUrl(); 
+        
         self.feeModel = ko.observable();
         
         self.selectedTabItem = ko.observable();
@@ -77,11 +79,15 @@ define(['knockout',
                     self.tabData.pop();
                 }                    
 
-                var name = "New Payment";                                    
-                
-                if(self.selectedPayment() && self.selectedPayment() != -1) {                             
-                    name = "Payment " + self.paymentList().get(self.selectedPayment()).get("number");
+                var name = "New Payment";      
+                                
+                try {
+                    name = "Payment New" + self.paymentList().get(self.selectedPayment()).get("number");
+                }                        
+                catch(err) {                
+                    console.log(err);
                 }
+                                
                                 
                 self.tabData.push({
                   "payment": name,
@@ -94,27 +100,32 @@ define(['knockout',
         }; 
         
         self.paymentListDataSource = ko.computed(function () {
+                        
             
             var fee = args.params.fee;
                         
            /* List View Collection and Model */
             var paymentModelItem = oj.Model.extend({
                 idAttribute: 'id'
-            });
+            });                        
+            
+            var url = self.baseUrl + "payments/new/list/" + fee;     
+                        
+                            
+            try {
+                var paymentId = self.feeModel().payment.id;    
+                url = self.baseUrl + "payments/list/" + paymentId;                                                 
+            }                        
+            catch(err) {                
+                
+            } 
 
             var paymentListCollection = new oj.Collection(null, {
-                url: "http://192.168.0.5:8080/IncomeService/api/payments/fee/" + fee,
+                url: url,
                 model: paymentModelItem
             });                        
 
-            self.paymentList = ko.observable(paymentListCollection);
-                        
-            
-            self.sleep(500).then(() => {
-                if(self.paymentList().length == 0) {  
-                    $("#newButton").trigger("click");
-                }
-            });            
+            self.paymentList = ko.observable(paymentListCollection);                                                
 
             //self.backTestListDataSource(new oj.CollectionTableDataSource(self.backTestList()));   
             return new PagingDataProviderView(new CollectionDataProvider(self.paymentList()));
@@ -125,7 +136,7 @@ define(['knockout',
             
             var feeId = args.params.fee;            
                         
-            $.getJSON("http://192.168.0.5:8080/IncomeService/api/fees/" + feeId)
+            $.getJSON(self.baseUrl + "fees/" + feeId)
                     .then(function (fee) {       
                 //alert("fee = " + JSON.stringify(fee));
                 self.feeModel(fee);                
@@ -134,35 +145,7 @@ define(['knockout',
             
         });
         
-        
-        /* New payment listener */        
-        self.newPayment = function () {
-            
-            self.sleep(500).then(() => {                
-                $(".oj-pagingcontrol-nav-last").removeClass("oj-disabled");
-                self.sleep(500).then(() => {                    
-                    $(".oj-pagingcontrol-nav-last").trigger("click");  
-                });                
-            });
-            
-            var payment = {};                        
-            
-            payment.id = -1;
-            
-            payment.number = "New";            
-            
-            self.paymentList().push(payment)
-            
-            console.log(self.paymentList());                                    
-             
-            self.selectedPaymentModel(payment);                        
-            
-            self.selectedPayment([-1]);    
-            
-            //self.paymentListSelectionChanged();
-                                                                              
-        };                         
-
+                
         self.deleteTab = function (id) {                        
             
             // Prevent the first item in the list being removed
