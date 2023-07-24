@@ -17,9 +17,9 @@
     <div class="oj-xl-2 oj-lg-2 oj-md-3 oj-sm-12 oj-flex-item oj-flex">
       <div id="navigationContent" role="navigation" class="oj-panel oj-margin oj-flex-item">
             <!-- Ticket List -->
-            <div id='listviewWrapper' class="list-view-container">
+            <div id='listviewWrapper' class="list-view-container">                                
                 <!--oj-paging-control id="paging" data="[[backTestListDataSource]]" page-size="4">
-                </oj-paging-control-->
+                </oj-paging-control-->                
                 <oj-paging-control slot="header"
                     id="paging" data="[[paymentListDataSource]]" 
                     page-options='[[pagingLayout]]' page-size="6">
@@ -87,7 +87,8 @@
         <div class="oj-panel oj-flex-item" id="payment">
             <div data-bind="ojModule: { name: 'payment', params: 
                         {paymentModel: selectedPaymentModel, paymentList: paymentList, 
-                    selectedPayment: selectedPayment, feeModel: feeModel} }"
+                        refreshPaymentList: refreshPaymentList,
+                        selectedPayment: selectedPayment, feeModel: feeModel} }"
             class="oj-sm-padding-4x">
             </div>
         </div>

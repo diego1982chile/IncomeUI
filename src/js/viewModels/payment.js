@@ -56,7 +56,9 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         
         self.selectedFees = ko.observableArray([]);
         self.selectedFeeModel = ko.observable();
-        self.feeList = ko.observable();        
+        self.feeList = ko.observable();
+        
+        self.paymentModel = ko.observable();
         
         self.fees_arr = ko.observableArray([]);
         
@@ -68,11 +70,13 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             self.messages([]);                        
         }
         
-        self.refreshPaymentList = (payment) => {              
-            params.paymentList().pop();
-            params.paymentList().push(payment);            
-            //$(".oj-pagingcontrol-nav-last").trigger("click");
-            //params.selectedPayment([payment.id]);
+        self.refreshPayments = (payment) => {                                     
+            /*
+            params.paymentList().pop();                                                   
+            params.paymentList().push(payment);                               
+            params.selectedPayment([payment.id]);            
+            */
+            params.refreshPaymentList(params.feeModel().id);
         };
         
         self.removeFromPaymentList = (id) => {                         
@@ -84,9 +88,8 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 }
             }); 
         };
-       
-                        
-        ko.computed(function () {                            
+        
+        self.refreshPayment = () => { 
             
             if(params.feeModel() === undefined) {                
                 return;
@@ -143,18 +146,30 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             
             $.getJSON(url2).then(function (fees) {                 
                 //Walert(payment.number);                                                   
-                //self.paymentModel(payment);                   
+                //self.paymentModel(payment);
+                var feesIds = [];
+                self.fees_arr([]);
                 
                 fees.forEach((fee) => {                    
                     var fee_obj = {};
                     fee_obj.value = fee.id;
                     fee_obj.label = fee.year.year + "/" + fee.month.name;
-                    fee_obj.amount = fee.amount;
-                    self.fees_arr().push(fee_obj);
-                });                                
+                    fee_obj.amount = fee.amount;                    
+                    self.fees_arr().push(fee_obj);                    
+                    feesIds.push(fee.id);
+                });                                                               
+                
+                if (params.feeModel().payment) {
+                    self.selectedFees(feesIds);
+                }                
                 
                 self.feeList(new ArrayDataProvider(self.fees_arr(), { keyAttributes: "value" }));
-            });                                                                                                   
+            });
+        };
+                        
+        ko.computed(function () {                                       
+            
+            self.refreshPayment();                                                                                                                           
                              
         });   
        
@@ -190,20 +205,30 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                         payment.amount = self.totalAmount(); 
                         payment.id = self.id();
                     }
+                    
+                    var feesIds = "";
+                    
+                    $(self.selectedFees()).each(function(key, value) {                                                                          
+                        feesIds = feesIds +  "&fees=" + value;
+                    });                                          
+                    
+                    feesIds.replace("&fees=","");                                        
                                                               
                     $.ajax({                    
                         type: "POST",
-                        url: self.baseUrl + "payments/save?fees=" + self.selectedFees(),                                        
+                        url: self.baseUrl + "payments/save?fees=" + feesIds,                                        
                         dataType: "json",      
                         data: JSON.stringify(payment),			  		 
                         //crossDomain: true,
                         contentType : "application/json",                    
-                        success: function(fee) {                                            
+                        success: function(payment) {                                            
                             self.messages([{severity: 'confirmation', summary: 'Succesful Action', detail: "payment saved successfuly", autoTimeout: 5000}]);                                                    
                             //params.paymentList(fee.payments);                            
                             //params.selectedPayment([self.getPaymentByNumber(fee, self.number()).id]); 
                             //self.feeModel(fee);
-                            self.refreshPaymentList(self.getPaymentByNumber(fee, self.number()));                            
+                            params.feeModel().payment = payment;                            
+                            self.refreshPayment();                                                        
+                            params.refreshPaymentList(params.feeModel().id);
                         },
                         error: function (request, status, error) {
                             //alert(JSON.stringify(request));                          
@@ -225,15 +250,18 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             self.deletePayment(id);
  
             $.ajax({                    
-                type: "POST",
-                url: self.baseUrl + "fees/save",                                        
+                type: "DELETE",
+                url: self.baseUrl + "payments/delete/" + id,                                        
                 dataType: "json",      
-                data: JSON.stringify(params.feeModel()),			  		 
+                //data: JSON.stringify(params.feeModel()),			  		 
                 //crossDomain: true,
                 contentType : "application/json",                    
-                success: function(fee) {                                            
+                success: function() {                                            
                     self.messages([{severity: 'info', summary: 'Succesful Action', detail: "payment removed successfuly", autoTimeout: 5000}]);
-                    self.removeFromPaymentList(id);        
+                    self.removeFromPaymentList(id);  
+                    params.feeModel().payment = null;                            
+                    self.refreshPayment();                                                        
+                    params.refreshPaymentList(params.feeModel().id);
                 },
                 error: function (request, status, error) {
                     //alert(JSON.stringify(request));                          
@@ -262,13 +290,13 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 
         self.totalAmount = ko.computed(() => {                                    
             
-            var totalAmount = 0; 
+            var totalAmount = 0;            
                  
-            $(self.selectedFees()).each(function(key, value) {                
+            $(self.selectedFees()).each(function(key, value) {                                  
                 
-                var payment = self.getPaymentById(value);
+                //var payment = self.getPaymentById(value);
          
-                totalAmount = totalAmount + payment.amount;
+                totalAmount = totalAmount + self.feeModel().amount;
                 
             });                                                
                         

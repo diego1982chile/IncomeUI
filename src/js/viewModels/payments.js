@@ -77,17 +77,13 @@ define(['knockout',
                 
                 while(self.tabData().length > 0) {                    
                     self.tabData.pop();
-                }                    
-
-                var name = "New Payment";      
-                                
-                try {
-                    name = "Payment New" + self.paymentList().get(self.selectedPayment()).get("number");
-                }                        
-                catch(err) {                
-                    console.log(err);
                 }
-                                
+                
+                var name = "New Payment";      
+                
+                if (self.feeModel() &&  self.feeModel().payment) {
+                    name = "Payment " + self.feeModel().payment.number;
+                }                                               
                                 
                 self.tabData.push({
                   "payment": name,
@@ -99,45 +95,45 @@ define(['knockout',
             self.selectedTabItem(self.selectedPayment());                        
         }; 
         
-        self.paymentListDataSource = ko.computed(function () {
-                        
-            
-            var fee = args.params.fee;
-                        
+        self.refreshPaymentList = (fee) => {  
+                                                
            /* List View Collection and Model */
             var paymentModelItem = oj.Model.extend({
                 idAttribute: 'id'
             });                        
             
             var url = self.baseUrl + "payments/new/list/" + fee;     
-                        
-                            
-            try {
-                var paymentId = self.feeModel().payment.id;    
-                url = self.baseUrl + "payments/list/" + paymentId;                                                 
-            }                        
-            catch(err) {                
-                
-            } 
+                                                    
+            if (self.feeModel() &&  self.feeModel().payment) {                
+                var paymentId = self.feeModel().payment.id;                    
+                url = self.baseUrl + "payments/list/" + paymentId; 
+                self.paymentList().pop();
+                self.paymentList().push(self.feeModel().payment);
+            }                
 
             var paymentListCollection = new oj.Collection(null, {
                 url: url,
                 model: paymentModelItem
             });                        
 
-            self.paymentList = ko.observable(paymentListCollection);                                                
+            self.paymentList = ko.observable(paymentListCollection);                        
+            
 
             //self.backTestListDataSource(new oj.CollectionTableDataSource(self.backTestList()));   
             return new PagingDataProviderView(new CollectionDataProvider(self.paymentList()));
             //return new CollectionDataProvider(self.houseList());
+        };
+        
+        self.paymentListDataSource = ko.computed(function () {                
+            var fee = args.params.fee;
+            return self.refreshPaymentList(fee);
         });  
         
         ko.computed(function () {
             
             var feeId = args.params.fee;            
                         
-            $.getJSON(self.baseUrl + "fees/" + feeId)
-                    .then(function (fee) {       
+            $.getJSON(self.baseUrl + "fees/" + feeId).then(function (fee) {       
                 //alert("fee = " + JSON.stringify(fee));
                 self.feeModel(fee);                
             });
