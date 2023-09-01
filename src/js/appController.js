@@ -84,9 +84,9 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
     
     this.isAdmin = ko.observable(false);
 
-    this.incomeServiceBaseUrl = ko.observable("http://192.168.0.9:8080/IncomeService/api/");
+    this.incomeServiceBaseUrl = ko.observable("http://192.168.0.14:8080/IncomeService/api/");
 
-    this.tokenServiceBaseUrl = ko.observable("http://192.168.0.9:8181/TokenService/api/");
+    this.tokenServiceBaseUrl = ko.observable("http://192.168.0.14:8181/TokenService/api/");
       
     this.messages = ko.observableArray();
   
@@ -177,8 +177,7 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
           }
      }
        
-    this.openDialog = function(event, data) {    
-        alert("hola");
+    this.openDialog = function(event, data) {            
         document.getElementById("dialogPreferences").open();                 
     }
     

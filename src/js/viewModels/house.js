@@ -63,11 +63,13 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         self.removeFromHouseList = (id) => {                         
             params.houseList().remove(id);
             params.selectedHouse([]);
+            /*
             self.sleep(500).then(() => {   
-                if(params.houseList().length == 0) { 
+                if(params.houseList().length === 0) { 
                     $("#newButton").trigger("click");  
                 }
             }); 
+            */
         };
        
                         

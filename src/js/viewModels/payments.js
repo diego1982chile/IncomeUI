@@ -45,7 +45,7 @@ define(['knockout',
         /* Variables */        
         //self.selectedTabItem = ko.observable("settings");
         //self.backTestListDataSource = ko.observable();
-        self.selectedPayment = ko.observable([-1]);
+        self.selectedPayment = ko.observable();
         self.selectedPaymentModel = ko.observable();
         self.paymentList = ko.observable();        
         
@@ -54,7 +54,7 @@ define(['knockout',
         self.pagingLayout = { layout: ['nav'], maxPageLinks: 5 };
         
         /* Tab Component */
-        self.tabData = ko.observableArray([{"payment": "New Payment", "id": [-1]}]);
+        self.tabData = ko.observableArray([]);
         self.tabBarDataSource = new oj.ArrayTableDataSource(self.tabData, { idAttribute: 'id' });
         
         self.sleep = (ms) => {
@@ -62,13 +62,19 @@ define(['knockout',
         }
         
         /* List selection listener */        
-        self.paymentListSelectionChanged = function () {                          
-                        
+        self.paymentListSelectionChanged = function () {
+            
+            if (self.selectedPayment().length === 0) {
+                return;
+            }            
+            
+            console.log("self.selectedPayment() = '" +  JSON.stringify(self.selectedPayment()) + "'");
+            
             self.selectedPaymentModel(self.paymentList().get(self.selectedPayment()));                        
-                                                              
+                                  
             // Check if the selected ticket exists within the tab data
             var match = ko.utils.arrayFirst(self.tabData(), function (item) {
-              return item.id === self.selectedPayment();
+                return item.id === self.selectedPayment();
             });
             
             console.log(JSON.stringify(self.paymentList()));                        
@@ -79,11 +85,14 @@ define(['knockout',
                     self.tabData.pop();
                 }
                 
-                var name = "New Payment";      
+                var name = "";      
                 
                 if (self.feeModel() &&  self.feeModel().payment) {
                     name = "Payment " + self.feeModel().payment.number;
-                }                                               
+                }   
+                else {                    
+                    name = "New Payment";          
+                }
                                 
                 self.tabData.push({
                   "payment": name,
@@ -93,48 +102,56 @@ define(['knockout',
             }
             
             self.selectedTabItem(self.selectedPayment());                        
-        }; 
+        };         
         
-        self.refreshPaymentList = (fee) => {  
-                                                
-           /* List View Collection and Model */
+        self.paymentListDataSource = ko.computed(function () {              
+                                    
+            var fee = args.params.fee;
+            
+            /* List View Collection and Model */
             var paymentModelItem = oj.Model.extend({
                 idAttribute: 'id'
             });                        
             
-            var url = self.baseUrl + "payments/new/list/" + fee;     
-                                                    
-            if (self.feeModel() &&  self.feeModel().payment) {                
-                var paymentId = self.feeModel().payment.id;                    
-                url = self.baseUrl + "payments/list/" + paymentId; 
-                self.paymentList().pop();
-                self.paymentList().push(self.feeModel().payment);
-            }                
+            var url = self.baseUrl + "payments/new/list/" + fee;    
+                                                                
+            try {         
+                var paymentId = self.feeModel().payment.id;  
+                url = self.baseUrl + "payments/list/" + paymentId;                                   
+            }   
+            catch (e) {
+                console.log(e);
+            }   
 
             var paymentListCollection = new oj.Collection(null, {
                 url: url,
                 model: paymentModelItem
             });                        
 
-            self.paymentList = ko.observable(paymentListCollection);                        
+            self.paymentList = ko.observable(paymentListCollection);             
             
+            
+            self.sleep(500).then(() => {
+                if(self.paymentList().length === 0) {  
+                    var payment = {};                                    
+                    payment.number = "New";                
+                    payment.id = -1;            
+                    self.paymentList().push(payment)                                     
+                    self.selectedPaymentModel(payment);                                    
+                    //self.selectedPayment([-1]);    
+                }
+            });                 
 
             //self.backTestListDataSource(new oj.CollectionTableDataSource(self.backTestList()));   
             return new PagingDataProviderView(new CollectionDataProvider(self.paymentList()));
             //return new CollectionDataProvider(self.houseList());
-        };
-        
-        self.paymentListDataSource = ko.computed(function () {                
-            var fee = args.params.fee;
-            return self.refreshPaymentList(fee);
         });  
         
         ko.computed(function () {
             
-            var feeId = args.params.fee;            
+            var feeId = args.params.fee;             
                         
-            $.getJSON(self.baseUrl + "fees/" + feeId).then(function (fee) {       
-                //alert("fee = " + JSON.stringify(fee));
+            $.getJSON(self.baseUrl + "fees/" + feeId).then(function (fee) {
                 self.feeModel(fee);                
             });
             
@@ -142,7 +159,9 @@ define(['knockout',
         });
         
                 
-        self.deleteTab = function (id) {                        
+        self.deleteTab = function (id) { 
+            
+            alert("deleteTab");
             
             // Prevent the first item in the list being removed
             //if(id != self.houseList().at(0).id){          
@@ -182,7 +201,26 @@ define(['knockout',
         self.tabSelectionChanged = function () {               
             self.selectedPaymentModel(self.paymentList().get(self.selectedTabItem())); 
             self.tabBarDataSource.reset();
-        }         
+        };
+        
+        /* New house listener */        
+        self.newPayment = function () { 
+            
+            self.sleep(500).then(() => {                
+                $(".oj-pagingcontrol-nav-last").removeClass("oj-disabled");
+                self.sleep(500).then(() => {                    
+                    $(".oj-pagingcontrol-nav-last").trigger("click");  
+                });                
+            });
+            
+            var payment = {};                                    
+            payment.number = "New";                
+            payment.id = -1;            
+            self.paymentList().push(payment)                                     
+            self.selectedPaymentModel(payment);                                    
+            self.selectedPayment([-1]);                            
+                                                                              
+        };    
                 
     }
         

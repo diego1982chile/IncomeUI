@@ -60,7 +60,11 @@ define(['knockout',
         }
         
         /* List selection listener */        
-        self.houseListSelectionChanged = function () {                         
+        self.houseListSelectionChanged = function () { 
+            
+            //alert("self.selectedHouse() = " + self.selectedHouse());
+            
+            //alert("self.houseList() = '" +  JSON.stringify(self.houseList()) + "'");
                         
             self.selectedHouseModel(self.houseList().get(self.selectedHouse()));                        
                                                               
@@ -81,7 +85,7 @@ define(['knockout',
                     
                 console.log(self.houseList().get(self.selectedHouse()));
                 
-                if(self.selectedHouse() && self.selectedHouse() != -1) {                                        
+                if(self.selectedHouse() && self.selectedHouse() !== -1) {                                        
                     name = "House " + self.houseList().get(self.selectedHouse()).get("number");
                 }
                 
@@ -95,7 +99,8 @@ define(['knockout',
             self.selectedTabItem(self.selectedHouse());                        
         }; 
         
-        self.houseListDataSource = ko.computed(function () {
+        self.houseListDataSource = ko.computed(function () {            
+            
            /* List View Collection and Model */
             var houseModelItem = oj.Model.extend({
                 idAttribute: 'id'

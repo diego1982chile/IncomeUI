@@ -12,7 +12,7 @@ and open the template in the editor.
     
     <oj-collapsible id="collapsiblePage" data-oj-binding-provider="none" expanded> 
         
-        <h1 slot="header" class="oj-typography-heading-sm oj-header-border">Payment Data</h1>
+        <h1 slot="header" class="oj-typography-heading-sm oj-header-border">Payment Data</h1>                
             
         <oj-form-layout id="ofl1" label-edge="start" max-columns="1" 
             class="oj-form-control-full-width"> 
@@ -27,7 +27,7 @@ and open the template in the editor.
             <oj-input-text
                 id="number"
                 value="{{number}}"
-                label-hint="Number"                                 
+                label-hint="Number:"                                 
                 readonly>              
             </oj-input-text>
             
@@ -35,7 +35,7 @@ and open the template in the editor.
                 <oj-input-text
                     id="datetime"
                     value="{{datetime}}"
-                    label-hint="Datetime"                                 
+                    label-hint="Datetime:"                                 
                     readonly>              
                 </oj-input-text>
             </oj-bind-if>             
@@ -43,9 +43,10 @@ and open the template in the editor.
             <oj-bind-if test="[[isAdmin]]"> 
                 <oj-select-single 
                     id="neighbor" 
-                    label-hint="Neighbor"                    
+                    label-hint="Neighbor:"                    
                     value="{{neighbor}}"                        
-                    required                        
+                    required    
+                    disabled="[[disabled]]"
                     item-text="[[getItemText]]"                        
                     data="[[neighbors]]">
                     <template slot="itemTemplate" data-oj-as="item">
@@ -58,10 +59,21 @@ and open the template in the editor.
                 </oj-select-single>
             </oj-bind-if>
             
+            <oj-bind-if test="[[hasDebts]]">
+                    <oj-checkboxset
+                        label-hint="Debts:"
+                        required
+                        readonly="[[disabled]]"
+                        options="{{debtList}}"
+                        value="{{selectedDebts}}">                        
+                    </oj-checkboxset>               
+            </oj-bind-if>    
+            
             <oj-bind-if test="[[isAdmin]]">
                 <oj-checkboxset
-                    label-hint="Fees"
+                    label-hint="Fees:"
                     required
+                    readonly="[[disabled]]"
                     options="{{feeList}}"
                     value="{{selectedFees}}">                        
                 </oj-checkboxset>
@@ -70,9 +82,10 @@ and open the template in the editor.
             <oj-bind-if test="[[isAdmin() === false]]"> 
                 <oj-select-single 
                     id="neighbor" 
-                    label-hint="Neighbor"                    
+                    label-hint="Neighbor:"                    
                     value="{{neighbor}}"                        
                     required readonly     
+                    readonly="[[disabled]]"
                     style="height:100px"
                     item-text="[[getItemText]]"                        
                     data="[[neighbors]]">
@@ -89,13 +102,14 @@ and open the template in the editor.
             <oj-input-number
                 id="amount"
                 value="{{totalAmount}}"
-                label-hint="Amount"
+                label-hint="Amount:"
                 required="required" 
+                readonly="[[disabled]]"
                 min="0"
                 readonly="[[isAdmin?'':'readonly']]"                
                 max="9999999"
                 step="0">              
-            </oj-input-number>             
+            </oj-input-number>                                     
 
         </oj-form-layout> 
         
@@ -108,6 +122,8 @@ and open the template in the editor.
 <br/>
 
 <div slot="footer" style="text-align:right">
+        
+    <oj-progress id="progressCircle" type="circle" style="display:none" value="-1"></oj-progress>
     
     <oj-button id="backButton" on-oj-action="[[goToFees]]" class="">
         Back
@@ -120,7 +136,7 @@ and open the template in the editor.
         <oj-button id="saveButton" chroming="callToAction" on-oj-action="[[submitFee]]">
             Save
         </oj-button>
-    </oj-bind-if>
+    </oj-bind-if>        
     
 </div>
 

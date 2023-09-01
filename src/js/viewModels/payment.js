@@ -50,17 +50,24 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         
         self.totalAmount = ko.observable();
         
-        self.disabled = ko.observable(true);
-                                                    
-        self.feeModel = ko.observable();  
+        self.disabled = ko.observable(true);      
+        
+        self.hasDebts = ko.observable(false);      
         
         self.selectedFees = ko.observableArray([]);
         self.selectedFeeModel = ko.observable();
         self.feeList = ko.observable();
         
+        self.selectedDebts = ko.observableArray([]);
+        self.selectedDebtModel = ko.observable();
+        self.debtList = ko.observable();
+        
+        self.feeModel = ko.observable();
         self.paymentModel = ko.observable();
         
         self.fees_arr = ko.observableArray([]);
+        
+        self.debts_arr = ko.observableArray([]);
         
         self.messages = ko.observableArray();
   
@@ -70,108 +77,171 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             self.messages([]);                        
         }
         
-        self.refreshPayments = (payment) => {                                     
-            /*
-            params.paymentList().pop();                                                   
-            params.paymentList().push(payment);                               
-            params.selectedPayment([payment.id]);            
-            */
-            params.refreshPaymentList(params.feeModel().id);
+        self.refreshPayments = (payment) => {                            
+            params.feeModel(self.feeModel());
+            params.paymentList([]);                                                                    
+            self.sleep(1000).then(() => {                
+                params.paymentList().push(payment);
+                self.sleep(1000).then(() => {                     
+                    params.selectedPayment([payment.id]);                                        
+                    //$(".oj-listview-item").firs().trigger("click");
+                }); 
+            });                                             
+            
         };
         
         self.removeFromPaymentList = (id) => {                         
-            params.paymentList().remove(id);
-            params.selectedPayment([]);
-            self.sleep(500).then(() => {   
-                if(params.paymentList().length === 0) { 
-                    $("#newButton").trigger("click");  
-                }
+            params.paymentList([]);                                                                  
+            self.sleep(500).then(() => {                   
+                params.paymentList().pop();          
+                params.selectedPayment([-1]);                
+                self.sleep(500).then(() => {                       
+                    params.feeModel(self.feeModel());                
+                    //$(".oj-listview-item").firs().trigger("click");
+                }); 
             }); 
         };
         
-        self.refreshPayment = () => { 
+        ko.computed(function () {             
             
             if(params.feeModel() === undefined) {                
                 return;
-            }    
+            }                
             
-            self.feeModel(params.feeModel());
+            self.feeModel(params.feeModel()); 
             
-            self.house(params.feeModel().house.number);
-            
-            self.year(params.feeModel().year.year + " - " + params.feeModel().month.name);
-            
-            //alert(JSON.stringify(params.feeModel().house.neighbors));                        
-            
-            self.neighbors(new ArrayDataProvider(
-                params.feeModel().house.neighbors,
-                {idAttribute: 'id'}));                            
-                
-            self.amount(0); 
-            self.neighbor(null);
-            
-            var url = self.baseUrl + "payments/new/" + params.feeModel().id;                             
+            var url = self.baseUrl + "payments/new/" + params.feeModel().id;              
                             
-            if (params.feeModel().payment) {
-                url = self.baseUrl + "payments/" + params.feeModel().payment.id;                                                 
+            try {
+                if (params.paymentModel().id !== -1) {
+                    url = self.baseUrl + "payments/" + params.paymentModel().id;                                                 
+                }                
             }                                    
+            catch(err) {                
+                 console.log(err);
+            }                        
                         
-            $.getJSON(url).then(function (payment) {                 
-                //alert(payment.number);
+            $.getJSON(url).then(function (payment) {                                
                 console.log(JSON.stringify(payment));                                      
-                //self.paymentModel(payment);                                  
+                
+                self.paymentModel(payment);                                  
+                                
                 self.id(payment.id);                                           
                 self.number(payment.number);                
                 self.datetime(payment.datetime); 
                 self.amount(payment.amount);
                 
+                self.house(params.feeModel().house.number);
+                
+                self.neighbors(new ArrayDataProvider(
+                    params.feeModel().house.neighbors,
+                    {idAttribute: 'id'}));
+                
                 if(payment.neighbor) {
                     self.neighbor(payment.neighbor.id);                                
                 }                                                
                 
-                if(payment.persisted) {                    
+                if(payment.persisted) {                     
                     $("#deleteButton").show();
+                    self.disabled(true);
                 }
                 else {
                     $("#deleteButton").hide();
+                    self.disabled(false);
                 }                
               
-            });                        
+            });                                           
             
             var url2 = self.baseUrl + "fees/unpaid/" + params.feeModel().id;    
             
-            if (params.feeModel().payment) {
-                url2 = self.baseUrl + "fees/payment/" + params.feeModel().payment.id;                                                 
-            }                        
-            
-            $.getJSON(url2).then(function (fees) {                 
-                //Walert(payment.number);                                                   
+            try {
+                if (params.paymentModel().id !== -1) {
+                    url2 = self.baseUrl + "fees/payment/" + params.paymentModel().id;                                                 
+                }                
+            }    
+            catch (e) {
+                console.log(e);
+            }
+                          
+            $.getJSON(url2).then(function (fees) {                                                                                  
                 //self.paymentModel(payment);
                 var feesIds = [];
                 self.fees_arr([]);
-                
-                fees.forEach((fee) => {                    
+                               
+                fees.forEach((fee) => {   
+                    //alert(JSON.stringify("fee = " + JSON.stringify(fee)));
                     var fee_obj = {};
                     fee_obj.value = fee.id;
                     fee_obj.label = fee.year.year + "/" + fee.month.name;
                     fee_obj.amount = fee.amount;                    
                     self.fees_arr().push(fee_obj);                    
                     feesIds.push(fee.id);
-                });                                                               
+                });                   
+                
+                //alert(JSON.stringify(self.fees_arr()));
                 
                 if (params.feeModel().payment) {
-                    self.selectedFees(feesIds);
-                }                
-                
-                self.feeList(new ArrayDataProvider(self.fees_arr(), { keyAttributes: "value" }));
+                    self.selectedFees(feesIds);                                        
+                }
+                else {
+                    self.selectedFees([]);                    
+                }
+                                
+                self.feeList(new ArrayDataProvider(self.fees_arr(), { keyAttributes: "value" }));                                             
             });
-        };
-                        
-        ko.computed(function () {                                       
             
-            self.refreshPayment();                                                                                                                           
-                             
-        });   
+            var paymentId = -1;
+            
+            if (params.paymentModel()) {
+                paymentId = params.paymentModel().id;
+            }
+            
+            var url3 = self.baseUrl + "debts/house/" + params.feeModel().house.number + "/payment/" + paymentId;                            
+            
+            
+            $.getJSON(url3).then(function (debts) {                 
+                //alert(payment.number);                                                   
+                //self.paymentModel(payment);
+                
+                var debtsIds = [];
+                self.debts_arr([]);
+                var hasPayment = false;
+                
+                debts.forEach((debt) => {   
+                    //alert(JSON.stringify("debt = " + JSON.stringify(debt)));
+                    var debt_obj = {};
+                    debt_obj.value = debt.id;
+                    debt_obj.label = debt.amount;
+                    debt_obj.amount = debt.amount;                    
+                    self.debts_arr().push(debt_obj);                    
+                    if (debt.payment) {
+                        hasPayment = true;
+                    }
+                    debtsIds.push(debt.id);
+                });                  
+                
+                //alert(JSON.stringify(self.debts_arr()));
+                
+                if (hasPayment) {                                      
+                    self.selectedDebts(debtsIds);
+                }
+                else {                    
+                    self.selectedDebts([]);
+                }
+                
+                //alert(JSON.stringify(self.paymentModel()));
+                
+                if (hasPayment || (self.paymentModel().new && self.debts_arr().length > 0)) {                    
+                    self.hasDebts(true);
+                }   
+                else {
+                    self.hasDebts(false);
+                }
+                                
+                self.debtList(new ArrayDataProvider(self.debts_arr(), { keyAttributes: "value" }));
+            });
+            
+        });                         
        
          
         self.submitFee = function (event, data) {
@@ -212,23 +282,27 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                         feesIds = feesIds +  "&fees=" + value;
                     });                                          
                     
-                    feesIds.replace("&fees=","");                                        
+                    feesIds.replace("&fees=","");     
+                    
+                    var debtsIds = "";
+                    
+                    $(self.selectedDebts()).each(function(key, value) {                                                                          
+                        debtsIds = debtsIds +  "&debts=" + value;
+                    });                                          
+                    
+                    debtsIds.replace("&debts=","");                                         
                                                               
                     $.ajax({                    
                         type: "POST",
-                        url: self.baseUrl + "payments/save?fees=" + feesIds,                                        
+                        url: self.baseUrl + "payments/save?fees=" + feesIds + debtsIds,                                        
                         dataType: "json",      
                         data: JSON.stringify(payment),			  		 
                         //crossDomain: true,
                         contentType : "application/json",                    
                         success: function(payment) {                                            
-                            self.messages([{severity: 'confirmation', summary: 'Succesful Action', detail: "payment saved successfuly", autoTimeout: 5000}]);                                                    
-                            //params.paymentList(fee.payments);                            
-                            //params.selectedPayment([self.getPaymentByNumber(fee, self.number()).id]); 
-                            //self.feeModel(fee);
-                            params.feeModel().payment = payment;                            
-                            self.refreshPayment();                                                        
-                            params.refreshPaymentList(params.feeModel().id);
+                            self.messages([{severity: 'info', summary: 'Succesful Action', detail: "payment saved successfuly", autoTimeout: 5000}]);                                                    
+                            self.feeModel().payment = payment;                                
+                            self.refreshPayments(payment);                                                             
                         },
                         error: function (request, status, error) {
                             //alert(JSON.stringify(request));                          
@@ -247,7 +321,7 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             
             var id = self.id();
             
-            self.deletePayment(id);
+            //self.deletePayment(id);
  
             $.ajax({                    
                 type: "DELETE",
@@ -256,12 +330,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 //data: JSON.stringify(params.feeModel()),			  		 
                 //crossDomain: true,
                 contentType : "application/json",                    
-                success: function() {                                            
-                    self.messages([{severity: 'info', summary: 'Succesful Action', detail: "payment removed successfuly", autoTimeout: 5000}]);
-                    self.removeFromPaymentList(id);  
-                    params.feeModel().payment = null;                            
-                    self.refreshPayment();                                                        
-                    params.refreshPaymentList(params.feeModel().id);
+                success: function(id) {                                            
+                    self.messages([{severity: 'info', summary: 'Succesful Action', detail: "payment removed successfuly", autoTimeout: 5000}]);                      
+                    params.feeModel().payment = null;     
+                    params.paymentModel().id = -1;
+                    self.removeFromPaymentList(id);                                        
                 },
                 error: function (request, status, error) {
                     //alert(JSON.stringify(request));                          
@@ -298,10 +371,37 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
          
                 totalAmount = totalAmount + self.feeModel().amount;
                 
-            });                                                
+            });   
+            
+            $(self.selectedDebts()).each(function(key, value) {                                  
+                
+                var debt = self.getDebtById(value);
+                
+                //alert(JSON.stringify(debt));
+                
+                if (debt) {
+                    totalAmount = totalAmount + debt.amount;                    
+                }                         
+                
+            });  
                         
             return totalAmount;                        
-        });    
+        });
+        
+        self.getDebtById = (id) => {
+            
+            var toReturn; 
+                 
+            $(self.debts_arr()).each(function(key,value) {   
+                
+                if(value.value === id) {                    
+                    toReturn = value;
+                    return false;
+                }                
+            });                        
+            
+            return toReturn;
+        }
         
         self.getPaymentById = (id) => {
             
