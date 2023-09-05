@@ -50,6 +50,7 @@ define(['knockout',
         self.paymentList = ko.observable();        
         
         self.selectionRequired = ko.observable(false);
+                
         
         self.pagingLayout = { layout: ['nav'], maxPageLinks: 5 };
         

@@ -61,27 +61,40 @@
                 </oj-bind-if>              
             </script>
           
-            <script type="text/html" id="cell_template"> 
-                <oj-bind-if test="[[$data <= 0]]">                  
-                  <span>                                          
-                    <oj-bind-text value="[[$data]]" style="color:red"></oj-bind-text>                    
-                  </span>
-                </oj-bind-if>
+            <script type="text/html" id="cell_template">                 
                 <oj-bind-if test="[[$data.payment == 0]]">                  
-                  <span>                      
-                    <oj-bind-if test="[[$parent.isAdmin]]">  
-                        <oj-button chroming="outlined" on-oj-action="[[goToAccounts]]" class="oj-button-sm">                      
-                          Pagar
-                        </oj-button>                      
-                    </oj-bind-if>          
-                  </span>
+                    <oj-bind-if test="[[$data.amountType == 'FEE']]">
+                        <span>                      
+                          <oj-bind-if test="[[$parent.isAdmin]]">  
+                              <oj-button chroming="outlined" on-oj-action="[[goToAccounts]]" class="oj-button-sm">                      
+                                Pagar
+                              </oj-button>                      
+                          </oj-bind-if>          
+                        </span>
+                    </oj-bind-if>  
+                    <oj-bind-if test="[[$data.amountType == 'DEBT']]">
+                        <span>                                          
+                            <oj-bind-text value="-"></oj-bind-text>                    
+                        </span>
+                    </oj-bind-if>                          
                 </oj-bind-if>     
                 <oj-bind-if test="[[$data.payment != 0]]">
-                    <oj-button chroming="borderless" on-oj-action="[[goToAccounts]]" class="link-button">                      
-                        <oj-bind-text value="[[$data.payment]]" style="color:red"></oj-bind-text>                    
-                    </oj-button>                                          
-                </oj-bind-if>                          
-                
+                    <oj-bind-if test="[[$data.amountType == 'DEBT']]">
+                        <span>                                          
+                            <oj-bind-text value="[[$data.payment]]" style="color:red"></oj-bind-text>                    
+                        </span>
+                    </oj-bind-if>                          
+                    <oj-bind-if test="[[$data.amountType == 'FEE']]">
+                        <oj-button chroming="borderless" on-oj-action="[[goToAccounts]]" class="link-button">                      
+                            <oj-bind-text value="[[$data.payment]]" style="color:red"></oj-bind-text>                    
+                        </oj-button>                             
+                    </oj-bind-if>                          
+                </oj-bind-if>
+                <oj-bind-if test="[[$data.amountType == 'TOTAL']]">
+                    <span>                                          
+                        <oj-bind-text value="[[$data.payment]]"></oj-bind-text>                    
+                    </span>
+                </oj-bind-if> 
             </script> 
         </div>
     </div>          

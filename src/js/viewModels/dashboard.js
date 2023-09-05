@@ -19,7 +19,7 @@ define(['knockout',
         
  function(ko, CollectionDataProvider, ArrayDataProvider) {
 
-    function DashboardViewModel() {        
+    function DashboardViewModel(params) {        
         
         var self = this;      
         
@@ -49,9 +49,12 @@ define(['knockout',
         self.selectedYearModel = ko.observable();
         self.yearList = ko.observable();
         
-        self.selectionRequired = ko.observable(false);
+        self.selectionRequired = ko.observable(false);                  
+        
         
         self.yearListDataSource = ko.computed(function () {
+                        
+            
            /* List View Collection and Model */
             var categoryModelItem = oj.Model.extend({
                 idAttribute: 'id'
@@ -63,7 +66,16 @@ define(['knockout',
                 model: categoryModelItem
             });            
 
-            self.yearList = ko.observable(categoryListCollection);  
+            self.yearList = ko.observable(categoryListCollection);                                                  
+            
+            this.sleep(500).then(() => {                
+                if (rootViewModel.selectedYear() !== 0 && rootViewModel.selectedYear() !== self.selectedYear()) {                       
+                    //alert("rootViewModel.selectedYear() = " + rootViewModel.selectedYear() + " self.selectedYear() = " + self.selectedYear());
+                    self.selectedYear([rootViewModel.selectedYear()]);         
+                    //rootViewModel.selectedYear(self.selectedYear());                           
+                    self.selectedYearModel(self.yearList().get(self.selectedYear()));                        
+                }      
+            });             
 
             //self.backTestListDataSource(new oj.CollectionTableDataSource(self.backTestList()));   
             //return new PagingDataProviderView(new CollectionDataProvider(self.backTestList()));
@@ -71,9 +83,10 @@ define(['knockout',
         });                              
                 
         /* List selection listener */        
-        self.yearListSelectionChanged = function () {   
+        self.yearListSelectionChanged = function () {            
 
-            self.selectionRequired(false);
+            self.selectionRequired(false);                       
+
                         
             self.selectedYearModel(self.yearList().get(self.selectedYear()));                        
                                                               
@@ -88,7 +101,9 @@ define(['knockout',
                 
                 while(self.tabData().length > 0) {                    
                     self.tabData.pop();
-                } 
+                }   
+                
+                //alert("self.selectedYear() = " + self.selectedYear());
                 
                 self.tabData.push({
                   "year": self.yearList().get(self.selectedYear()).get("year"),
@@ -143,7 +158,12 @@ define(['knockout',
         }
                
         
-    }      
+    }    
+    
+            
+    this.sleep = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     /*
      * Returns an instance of the ViewModel providing one instance of the ViewModel. If needed,

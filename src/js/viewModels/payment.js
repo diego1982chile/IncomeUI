@@ -110,6 +110,8 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
             
             self.feeModel(params.feeModel()); 
             
+            rootViewModel.selectedYear(self.feeModel().year.id);                        
+            
             var url = self.baseUrl + "payments/new/" + params.feeModel().id;              
                             
             try {
@@ -467,14 +469,16 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
                 params.feeModel().payments.splice(index,1);                
             }            
         };
+        
+        
+        self.goToFees = (event, data) => {                            
+            var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
+            rootViewModel.router.go({path: 'dashboard'});        
+        };  
 
                                             
-    }
+    }          
     
-    this.goToFees = (event, data) => {                            
-        var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
-        rootViewModel.router.go({path: 'dashboard'});        
-    };
        
     return houseContentViewModel;
 });

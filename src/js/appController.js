@@ -42,8 +42,30 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
       ];
 
       // Router setup
+      // Router setup
       this.router = new CoreRouter(navData, {
         urlAdapter: new UrlParamAdapter()
+      });
+      
+      this.router.beforeStateChange.subscribe( (args) => {
+        var state = args.state;
+        var accept = args.accept;
+        // If we don't want to leave, block navigation
+        //if (currentViewmodel.isDirty) {
+        console.log(args);
+        
+        if(state && state.path != 'login') {
+            console.log(this);            
+            if(this.userLoggedIn && this.userLoggedIn() === "N") {
+            //if (currentViewmodel.isDirty) {
+                accept(Promise.reject('model is dirty'));
+                //alert("Unauthorized resource!");
+                var rootViewModel = ko.dataFor(document.getElementById('globalBody'));  
+                var msg = "Please login to access this resource";
+                rootViewModel.messages([{severity: 'warning', summary: 'Unauthorized resource', detail: msg, autoTimeout: 5000}]);
+            }                        
+        }          
+        //}
       });
       
       this.router.sync();
@@ -57,6 +79,8 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
       //this.navDataProvider = new ArrayDataProvider(navData.slice(1), {keyAttributes: "path"});
       
       this.navDataProvider = new oj.ArrayTableDataSource(navData.slice(0,1), {idAttribute: 'id'});
+      
+      this.dataProvider = new ArrayDataProvider(navData.slice(2), {keyAttributes: "path"});
 
       // Drawer
       // Close offcanvas on medium and larger screens
@@ -83,6 +107,8 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
     this.userLoggedIn = ko.observable("N");
     
     this.isAdmin = ko.observable(false);
+    
+    this.selectedYear = ko.observable(0);
 
     this.incomeServiceBaseUrl = ko.observable("http://192.168.0.14:8080/IncomeService/api/");
 
@@ -91,10 +117,10 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
     this.messages = ko.observableArray();
   
     this.messagesDataprovider = new ArrayDataProvider(this.messages);
-
-
-      this.authorize = (token) => { 
           
+
+    this.authorize = (token) => { 
+        
         let jwtData = token.split('.')[1]
         let decodedJwtJsonData = window.atob(jwtData)
         let decodedJwtData = JSON.parse(decodedJwtJsonData)
@@ -103,7 +129,16 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
                     
         $.ajaxSetup({
             beforeSend: function (xhr) {                
-                xhr.setRequestHeader("Authorization", "Bearer " + token);                
+                xhr.setRequestHeader("Authorization", "Bearer " + token);
+                var rootViewModel = ko.dataFor(document.getElementById('globalBody')); 
+                /*
+                rootViewModel.sleep(2000).then(() => {                     
+                    rootViewModel.showProgress();                    
+                }); 
+                */
+            },
+            complete: function () {
+                var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                  
             }
         });
         this.userLoggedIn("Y");
@@ -112,12 +147,12 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
             this.navDataProvider.reset(navData.slice(2), {idAttribute: 'id'});                                    
         }        
         else {
-            this.navDataProvider.reset(navData.slice(2, 3), {idAttribute: 'id'});                                    
-        }
+            this.navDataProvider.reset(navData.slice(2), {idAttribute: 'id'});                                    
+        }                
         
         this.router.go({path: 'dashboard'});
 
-      }    
+    }    
       
     $(function() {        
         $(document).ajaxError(function( event, request, settings ) {                
@@ -138,18 +173,18 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
                 rootViewModel.userLogin("Not yet logged in");
                 rootViewModel.userLoggedIn("N");                      
                 msg = 'No connection. Verify Network.';
-            } else if (request.status === 404) {
+            } else if (request.status == 404) {
                 msg = 'Requested page not found. [404]';
-            } else if (request.status === 500) {
+            } else if (request.status == 500) {
                 msg = 'Internal Server Error [500].';
             }
             
-            if (msg) {
-                rootViewModel.messages([{severity: 'error', summary: 'General Error', detail: msg, autoTimeout: 5000}]);                     
-            }
-                        
+            rootViewModel.hideProgress();
+            
+            rootViewModel.messages([{severity: 'error', summary: 'General Error', detail: msg, autoTimeout: 5000}]);                     
         });
-    });
+    }); 
+    
     
     this.router.beforeStateChange.subscribe( (args) => {
         var state = args.state;
@@ -163,7 +198,7 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
             this.userLogin("Not yet logged in");
             this.userLoggedIn("N");                     
         }                  
-    });       
+    }); 
       
     this.menuItemAction = (event) => {             
           if (event.target.textContent.trim() === "Sign Out") {
@@ -177,15 +212,21 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
           }
      }
        
-    this.openDialog = function(event, data) {            
+    this.openDialog = function(event, data) {                        
         document.getElementById("dialogPreferences").open();                 
     }
     
     this.closeDialog = function(event, data) {                        
         document.getElementById("dialogPreferences").close();                 
-    } 
+    }     
     
-    this.reset = () => {    
+            
+    this.sleep = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    
+    self.reset = () => {    
         
         var r = confirm("¿Are you sure you want to confirm this action?");
             
@@ -195,7 +236,7 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
                  
         $.ajax({                    
           type: "GET",
-          url: this.incomeServiceBaseUrl() + "database/load/",                                        
+          url: this.scrapperServiceBaseUrl() + "database/load/",                                        
           dataType: "json",                    
           //crossDomain: true,
           contentType : "application/json",                    
@@ -217,11 +258,8 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
 
       // Footer
       this.footerLinks = [
-        {name: 'About Oracle', linkId: 'aboutOracle', linkTarget:'http://www.oracle.com/us/corporate/index.html#menu-about'},
-        { name: "Contact Us", id: "contactUs", linkTarget: "http://www.oracle.com/us/corporate/contact/index.html" },
-        { name: "Legal Notices", id: "legalNotices", linkTarget: "http://www.oracle.com/us/legal/index.html" },
-        { name: "Terms Of Use", id: "termsOfUse", linkTarget: "http://www.oracle.com/us/legal/terms/index.html" },
-        { name: "Your Privacy Rights", id: "yourPrivacyRights", linkTarget: "http://www.oracle.com/us/legal/privacy/index.html" },
+        {name: 'About Forevision', linkId: 'aboutOracle', linkTarget:'https://www.forevision.cl/'},
+        { name: "Contact Us", id: "contactUs", linkTarget: "http://www.oracle.com/us/corporate/contact/index.html" },       
       ];
      }
      // release the application bootstrap busy state
