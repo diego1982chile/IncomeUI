@@ -78,24 +78,26 @@ and open the template in the editor.
                    "sortable": "enabled",
                    "headerText": "Name",
                    "className": "table-world-wrap",                                      
-                   "weight": "2",
-                   "minWidth": "10rem",
+                   "width": "18%",     
                    "template": "nameTemplate"},
                   {"field":"lastname",
                     "headerText": "Lastname",                           
                     "sortable": "enabled",
-                    "minWidth": "8rem",
-                    "weight": "2",
+                    "width": "18%",     
                     "template": "lastnameTemplate"},
                   {"field":"email",
                     "sortable": "enabled",                                                                       
                     "headerText": "Email",
+                    "width": "18%",     
                     "template": "emailTemplate"},                     
                    {"field":"phone",
                     "sortable": "enabled",                                                                       
                     "headerText": "Phone",
+                    "width": "18%",     
                     "template": "phoneTemplate"},                    
-                   {"headerText": "Action",                                                                                                                                        
+                   {"headerText": "Action",   
+                    "headerStyle": "text-align: center;",
+                    "style":"padding-top: 0px; padding-bottom: 0px; text-align: center;",
                     "template": "actionTemplate"}                  
                     ]'>
 
@@ -167,7 +169,7 @@ and open the template in the editor.
         </oj-bind-if>
 
         <oj-bind-if test='[[cell.mode=="edit"]]'>
-          <oj-toolbar class="oj-sm-padding-0-vertical">
+          <oj-toolbar class="oj-sm-padding-0-vertical oj-flex oj-sm-flex-items-initial oj-sm-justify-content-center">
             <oj-button display='icons' on-oj-action="[[handleDone]]">
               <span slot='startIcon' class="oj-ux-ico-check"></span>
               Save

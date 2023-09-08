@@ -59,34 +59,13 @@ and open the template in the editor.
                 </oj-select-single>
             </oj-bind-if>
             
-            <oj-bind-if test="[[hasDebts]]">
-                    <oj-checkboxset
-                        label-hint="Debts:"
-                        required
-                        readonly="[[disabled]]"
-                        options="{{debtList}}"
-                        value="{{selectedDebts}}">                        
-                    </oj-checkboxset>               
-            </oj-bind-if>    
-            
-            <oj-bind-if test="[[isAdmin]]">
-                <oj-checkboxset
-                    label-hint="Fees:"
-                    required
-                    readonly="[[disabled]]"
-                    options="{{feeList}}"
-                    value="{{selectedFees}}">                        
-                </oj-checkboxset>
-            </oj-bind-if>           
-            
             <oj-bind-if test="[[isAdmin() === false]]"> 
                 <oj-select-single 
                     id="neighbor" 
                     label-hint="Neighbor:"                    
                     value="{{neighbor}}"                        
-                    required readonly     
-                    readonly="[[disabled]]"
-                    style="height:100px"
+                    required    
+                    readonly="true"
                     item-text="[[getItemText]]"                        
                     data="[[neighbors]]">
                     <template slot="itemTemplate" data-oj-as="item">
@@ -96,8 +75,26 @@ and open the template in the editor.
                             </span>
                         </oj-list-item-layout>
                     </template>
-                </oj-select-single>
+                </oj-select-single>                         
             </oj-bind-if>
+            
+            <oj-bind-if test="[[hasDebts]]">
+                    <oj-checkboxset
+                        label-hint="Debts:"
+                        required
+                        readonly="[[disabled]]"
+                        options="{{debtList}}"
+                        value="{{selectedDebts}}">                        
+                    </oj-checkboxset>               
+            </oj-bind-if>    
+                        
+            <oj-checkboxset
+                label-hint="Fees:"
+                required
+                readonly="[[disabled]]"
+                options="{{feeList}}"
+                value="{{selectedFees}}">                        
+            </oj-checkboxset>                        
             
             <oj-input-number
                 id="amount"

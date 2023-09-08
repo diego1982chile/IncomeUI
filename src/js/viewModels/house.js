@@ -187,6 +187,11 @@ function (oj, ko, responsiveUtils, responsiveKnockoutUtils, ArrayDataProvider, C
         self.sleep = (ms) => {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+        
+        self.goToFees = (event, data) => {                            
+            var rootViewModel = ko.dataFor(document.getElementById('globalBody'));                                    
+            rootViewModel.router.go({path: 'dashboard'});        
+        }; 
                                             
     }    
        

@@ -147,7 +147,13 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
             this.navDataProvider.reset(navData.slice(2), {idAttribute: 'id'});                                    
         }        
         else {
-            this.navDataProvider.reset(navData.slice(2), {idAttribute: 'id'});                                    
+            var views = [];
+            navData.forEach((view) => {
+                if (!["login", "houses"].includes(view.id)) {
+                    views.push(view);
+                }                
+            });
+            this.navDataProvider.reset(views, {idAttribute: 'id'});                                    
         }                
         
         this.router.go({path: 'dashboard'});
@@ -160,7 +166,11 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
             var rootViewModel = ko.dataFor(document.getElementById('globalBody'));  
             var msg;
             
-            if(request.status === 401) {                  
+            if (request.status === 200) {
+                return false;
+            }
+            
+            if (request.status === 401) {                  
                 rootViewModel.navDataProvider.reset(navData.slice(0,1), {idAttribute: 'id'});
                 rootViewModel.router.go({path: 'login'});   
                 rootViewModel.userLogin("Not yet logged in");
@@ -173,13 +183,11 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
                 rootViewModel.userLogin("Not yet logged in");
                 rootViewModel.userLoggedIn("N");                      
                 msg = 'No connection. Verify Network.';
-            } else if (request.status == 404) {
+            } else if (request.status === 404) {
                 msg = 'Requested page not found. [404]';
-            } else if (request.status == 500) {
+            } else if (request.status === 500) {
                 msg = 'Internal Server Error [500].';
-            }
-            
-            rootViewModel.hideProgress();
+            }                   
             
             rootViewModel.messages([{severity: 'error', summary: 'General Error', detail: msg, autoTimeout: 5000}]);                     
         });
@@ -236,7 +244,7 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
                  
         $.ajax({                    
           type: "GET",
-          url: this.scrapperServiceBaseUrl() + "database/load/",                                        
+          url: this.incomeServiceBaseUrl() + "database/load/",                                        
           dataType: "json",                    
           //crossDomain: true,
           contentType : "application/json",                    
